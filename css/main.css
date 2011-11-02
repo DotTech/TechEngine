@@ -1,0 +1,33 @@
+﻿body {
+    background: #000;
+    font-family: "Trebuchet Ms", Helvetica, Arial, Verdana;
+    font-size: 13px;
+    color: #fff;
+}
+
+#wrapper {
+    margin: 0 auto;
+    width: 1000px;
+}
+
+    #wrapper #scene {
+        float: left;
+    }
+    
+    #wrapper #map {
+        float: right;
+    }
+    
+    #wrapper #debug {
+        float: left;
+        width: 980px;
+        height: 200px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        background: #fff;
+        font-family: "Lucidia Console", "Arial", "Verdana";
+        font-size: 9px;
+        padding: 10px;
+        margin: 20px 0 0 0;
+        color: #000;
+    }
