@@ -6,6 +6,7 @@ TechEngine.log("Loading 'techengine.global.js'...", true);
 */
 TechEngine.Global = function ()
 {
+    // Constant values
     var constants = {
         fieldOfView: 66,                // Player's field of view
         screenSize: { w: 480, h: 360 }, // Size of the projection plane
@@ -14,28 +15,38 @@ TechEngine.Global = function ()
         glIntervalTimeout: 20,          // Gameloop interval timeout
         canvasIdScene: "scene",         // ID of canvas element to render the scene on
         canvasIdMap: "map",             // ID of canvas element to render the map on
-        contextScene: null,             // Canvas context to render the scene on
-        contextMap: null,               // Canvas context to render the map on
+        mapScale: 0.2
     };
     
-    // Setup canvas elements
-    var cs = document.getElementById(constants.canvasIdScene),
-        cm = document.getElementById(constants.canvasIdMap);
+    // Global variables
+    var contextScene,
+        contextMap,
+        activeMap,
+        keys,
+        glInterval,
+        player,
+        angleBetweenRays = parseFloat(constants.fieldOfView / constants.screenSize.w),
+        watchWindow = document.getElementById("watch");
     
+    // Initialize canvas contexts
+    cs = document.getElementById(constants.canvasIdScene),
+    cm = document.getElementById(constants.canvasIdMap);    
     cs.width = constants.screenSize.w; cs.height = constants.screenSize.h;
     cm.width = constants.screenSize.w; cm.height = constants.screenSize.h;
     
-    constants.contextScene  = cs.getContext("2d");
-    constants.contextMap    = cm.getContext("2d");
+    contextScene  = cs.getContext("2d");
+    contextMap    = cm.getContext("2d");
     
+    // Reveal public members
     return {
         constants: constants,
-        angleBetweenRays: parseFloat(constants.fieldOfView / constants.screenSize.w),
-        player: { 
-            x: 100, y: 100, z: 0, 
-            w: 0, h: 48,
-            angle: new TechEngine.Math.Angle(280) 
-        },
+        contextScene: contextScene,
+        contextMap: contextMap,
+        keys: keys,
+        glInterval: glInterval,
+        angleBetweenRays: angleBetweenRays,
+        watchWindow: watchWindow,
+        player: player,
     }
 }();
 

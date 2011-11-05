@@ -18,18 +18,21 @@ var TechEngine =
 {
     // Include files in loading order
     includes: [ "js/techengine.math.js", "js/techengine.global.js", "js/techengine.data.js", 
-                "js/techengine.data.map1.js", "js/techengine.drawing.js", "js/techengine.main.js" ],
+                "js/techengine.data.map1.js", "js/techengine.canvas.js", "js/techengine.rendering.js",
+                "js/techengine.player.js", "js/techengine.input.js", "js/techengine.main.js" ],
     
     // Namespaces used in this application
-    Global: {},
-    Data:   {},
-    Math:   {},
-    Drawing:{},
-    Main:   {},
+    Global:     {},
+    Data:       {},
+    Math:       {},
+    Rendering:  {},
+    Input:      {},
+    Main:       {},
     
     // Write to debug log, needs to be defined before other files are included
-    log: function (msg, nobreak) {
-        var e = document.getElementById("debug");
+    log: function (msg, nobreak) 
+    {
+        var e = document.getElementById("messages");
         if (typeof e != "undefined" && e != null) {
             e.innerHTML += msg + (nobreak ? "" : "<br />");
         }
@@ -38,7 +41,8 @@ var TechEngine =
     // All files that need to be included for this application are listed in the TechEngine.includes[] array.
     // This function includes the first file in the array and then removes the element from the array.
     // The function is called by each include file to ensure all files are loaded one after another.
-    includeNext: function () {
+    includeNext: function () 
+    {
         if (TechEngine.includes.length > 0) {
             var e = document.createElement("script");
             

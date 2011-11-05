@@ -6,6 +6,8 @@ TechEngine.log("Loading 'techengine.math.js'...", true);
 */
 TechEngine.Math = function ()
 {
+    // Class:       TechEngine.Math.Angle
+    // Description: Defines an angle and provides methods for conversion between degrees and radians
     var Angle = function (degrees) 
     {
         var self = this;
@@ -64,8 +66,24 @@ TechEngine.Math = function ()
         this.setValue(degrees);
     };
     
+    var colorRgb = function (r, g, b)
+    {
+        return "rgb(" + r + ", " + g + ", " + b + ")";
+    }
+    
+    // Calculate difference in x and y for a distance at a specific angle
+    var getDeltaXY = function(angle, distance) 
+    {
+        return TechEngine.Data.vertex(
+            Math.cos(angle.radians) * distance,
+            Math.sin(angle.radians) * distance
+        );
+    }
+    
     return {
-        Angle: Angle
+        Angle: Angle,
+        colorRgb: colorRgb,
+        getDeltaXY: getDeltaXY
     };
 }();
 

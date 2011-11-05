@@ -2,7 +2,7 @@ TechEngine.log("Loading 'techengine.data.js'...", true);
 
 /*
 //  Namespace:      TechEngine.Data
-//  Description:    Data structures and resources
+//  Description:    Data structure definitions and resource buffers
 */
 TechEngine.Data = function ()
 {
@@ -15,7 +15,8 @@ TechEngine.Data = function ()
      */
     
     // Vertex structure
-    var vertex = function (x, y) {
+    var vertex = function (x, y) 
+    {
         return { 
             x: x, 
             y: y  
@@ -23,7 +24,8 @@ TechEngine.Data = function ()
     };
     
     // Wall structure
-    var wall = function (v1, v2, portal, front, back) {
+    var wall = function (v1, v2, portal, front, back) 
+    {
         return { 
             v1: v1,         // From vertex
             v2: v2,         // To vertex
@@ -34,7 +36,8 @@ TechEngine.Data = function ()
     };
     
     // Wall side structure
-    var wallside = function (topTexture, middleTexture, bottomTexture) {
+    var wallside = function (topTexture, middleTexture, bottomTexture) 
+    {
         return {
             topTexture: topTexture,         // index of texture to use for wall top
             middleTexture: middleTexture,   // index of texture to use for wall middle
@@ -43,7 +46,8 @@ TechEngine.Data = function ()
     };
     
     // Sector structure
-    var sector = function (floorHeight, ceilingHeight, floorTexture, ceilingTexture) {
+    var sector = function (floorHeight, ceilingHeight, floorTexture, ceilingTexture) 
+    {
         return {
             floorHeight: floorHeight,
             ceilingHeight: ceilingHeight,
@@ -56,7 +60,8 @@ TechEngine.Data = function ()
     };
     
     // Map structure
-    var map = function () {
+    var map = function () 
+    {
         return {
             playerStart: { 
                 x: 0, 
@@ -68,23 +73,54 @@ TechEngine.Data = function ()
         };
     };
     
+    // Keyboard key structur
+    var keyButton = function (code) 
+    {
+        return {
+            code: code,
+            pressed: false
+        };
+    };
+    
     /**
-     * Loading of resources
+     * Loading of game resources
      */
     
-    // ... to be implemented...
+    // Load map with index id as active map
+    var loadMap = function (id)
+    {
+        TechEngine.log("Called: TechEngine.Data.loadMap()");
+        
+        var map = TechEngine.Data.maps[0],
+            global = TechEngine.Global;
+        
+        global.activeMap = map;
+        
+        global.player.x = map.playerStart.x;
+        global.player.y = map.playerStart.y;
+        global.player.z = map.playerStart.z;
+        global.player.angle.setValue(map.playerStart.angle);
+    };
     
-
+    
+    
+    // Reveal public members
     return {
+        // Structures
         vertex: vertex,
         wall: wall,
         wallside: wallside,
         sector: sector,
         map: map,
+        keyButton: keyButton,
         
+        // Resource arrays
         maps: maps,
         textures: textures,
-        sprites: sprites
+        sprites: sprites,
+        
+        // Methods
+        loadMap: loadMap
     };
 }();
 
