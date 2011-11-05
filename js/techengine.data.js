@@ -55,7 +55,8 @@ TechEngine.Data = function ()
             ceilingTexture: ceilingTexture,
             vertices: new Array(),
             walls: new Array(),
-            objects: new Array()
+            objects: new Array(),
+            childsectors: new Array()
         };
     };
     
@@ -69,6 +70,7 @@ TechEngine.Data = function ()
                 z: 0, 
                 angle: 0 
             },
+            background: new Image(),
             sectors: new Array()
         };
     };

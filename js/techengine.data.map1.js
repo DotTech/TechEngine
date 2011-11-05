@@ -14,9 +14,10 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     map.playerStart.z = 0;
     map.playerStart.angle = 290;
     
+    map.background.src = "img/sky.jpg";
+    
     map.sectors = [
         data.sector(0, 128, 0, 0),
-        data.sector(32, 96, 0, 0),
         data.sector(32, 176, 0, 0),
         data.sector(32, 128, 0, 0)
     ];
@@ -43,23 +44,27 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
         data.wall(7, 0, false, wallSide, wallSide)
     ];
     
+    map.sectors[0].childsectors = [
+        data.sector(32, 96, 0, 0),
+    ];
+    
+        map.sectors[0].childsectors[0].vertices = [
+            data.vertex(536, 500),  // 0
+            data.vertex(600, 500),  // 1
+            data.vertex(600, 564),  // 2
+            data.vertex(536, 564),  // 3
+            data.vertex(500, 532)   // 4
+        ];
+        
+        map.sectors[0].childsectors[0].walls = [
+            data.wall(0, 1, false, wallSide, wallSide),
+            data.wall(1, 2, false, wallSide, wallSide),
+            data.wall(2, 3, false, wallSide, wallSide),
+            data.wall(3, 4, false, wallSide, wallSide),
+            data.wall(4, 0, false, wallSide, wallSide)
+        ];
+    
     map.sectors[1].vertices = [
-        data.vertex(536, 500),  // 0
-        data.vertex(600, 500),  // 1
-        data.vertex(600, 564),  // 2
-        data.vertex(536, 564),  // 3
-        data.vertex(500, 532)   // 4
-    ];
-    
-    map.sectors[1].walls = [
-        data.wall(0, 1, false, wallSide, wallSide),
-        data.wall(1, 2, false, wallSide, wallSide),
-        data.wall(2, 3, false, wallSide, wallSide),
-        data.wall(3, 4, false, wallSide, wallSide),
-        data.wall(4, 0, false, wallSide, wallSide)
-    ];
-    
-    map.sectors[2].vertices = [
         data.vertex(800, 300),  // 0
         data.vertex(1100, 200), // 1
         data.vertex(1200, 100), // 2
@@ -74,7 +79,7 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
         data.vertex(800, 600)   // 11
     ];
     
-    map.sectors[2].walls = [
+    map.sectors[1].walls = [
         data.wall(0, 1, false, wallSide, wallSide),
         data.wall(1, 2, false, wallSide, wallSide),
         data.wall(2, 3, false, wallSide, wallSide),
@@ -89,7 +94,40 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
         data.wall(11, 0, true, wallSide, wallSide)
     ];
     
-    map.sectors[3].vertices = [
+    map.sectors[1].childsectors = [
+        data.sector(176, 176, 0, 0),
+        data.sector(50, 176, 0, 0)
+    ];
+    
+        map.sectors[1].childsectors[0].vertices = [
+            data.vertex(1300, 200),  // 0
+            data.vertex(1400, 200),  // 1
+            data.vertex(1400, 300),  // 2
+            data.vertex(1300, 300)   // 3
+        ];
+        
+        map.sectors[1].childsectors[0].walls = [
+            data.wall(0, 1, false, wallSide, wallSide),
+            data.wall(1, 2, false, wallSide, wallSide),
+            data.wall(2, 3, false, wallSide, wallSide),
+            data.wall(3, 0, false, wallSide, wallSide),
+        ];
+        
+        map.sectors[1].childsectors[1].vertices = [
+            data.vertex(1500, 450),  // 0
+            data.vertex(1600, 450),  // 1
+            data.vertex(1600, 550),  // 2
+            data.vertex(1500, 550)   // 3
+        ];
+        
+        map.sectors[1].childsectors[1].walls = [
+            data.wall(0, 1, false, wallSide, wallSide),
+            data.wall(1, 2, false, wallSide, wallSide),
+            data.wall(2, 3, false, wallSide, wallSide),
+            data.wall(3, 0, false, wallSide, wallSide),
+        ];
+    
+    map.sectors[2].vertices = [
         data.vertex(1600, 700), // 0
         data.vertex(1900, 1000),// 1
         data.vertex(2000, 1200),// 2
@@ -98,7 +136,7 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
         data.vertex(1400, 800)  // 5
     ];
     
-    map.sectors[3].walls = [
+    map.sectors[2].walls = [
         data.wall(0, 1, false, wallSide, wallSide),
         data.wall(1, 2, false, wallSide, wallSide),
         data.wall(2, 3, false, wallSide, wallSide),

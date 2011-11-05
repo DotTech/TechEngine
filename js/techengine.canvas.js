@@ -66,6 +66,11 @@ CanvasRenderingContext2D.prototype.line = function(x, y, x2, y2, color)
     this.closePath();
 };
 
+CanvasRenderingContext2D.prototype.lineSquare = function (x, y, x2, y2, color)
+{
+    this.square(x, y, x2, y2 - y, color);
+};
+
 // Draw text
 CanvasRenderingContext2D.prototype.text = function(text, x, y, color, font)
 {

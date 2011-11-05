@@ -24,7 +24,8 @@ TechEngine.Main = function ()
     {
         TechEngine.Input.update();
         TechEngine.Rendering.Map.render();
-        TechEngine.Rendering.updateWatch();
+        TechEngine.Rendering.Scene.render();
+        TechEngine.Rendering.updateWatchWindow();
     };
     
     // Initialize and start the gameloop

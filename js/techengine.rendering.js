@@ -9,7 +9,7 @@ TechEngine.Rendering = function ()
     var lastFpsUpdate = new Date().getTime();
     
     // Updates the values in the watch window
-    var updateWatch = function ()
+    var updateWatchWindow = function ()
     {
         var win = TechEngine.Global.watchWindow;
         
@@ -26,41 +26,47 @@ TechEngine.Rendering = function ()
     }
     
     // Namespace: TechEngine.Rendering.Map
+    // Handles rendering of the map view
     var Map = function ()
     {
-        // Draw all the wall lines
-        var drawWalls = function (context, map, scale)
+        // Draw all the wall lines from a specific sector
+        var drawWalls = function (context, sector, scale)
         {
-            for (var s = 0; s < map.sectors.length; s++) {
-                var sector = map.sectors[s];
+            for (var w = 0; w < sector.walls.length; w++) {
+                var wall = sector.walls[w],
+                    v1 = sector.vertices[wall.v1],
+                    v2 = sector.vertices[wall.v2];
                 
-                for (var w = 0; w < sector.walls.length; w++) {
-                    var wall = sector.walls[w],
-                        v1 = sector.vertices[wall.v1],
-                        v2 = sector.vertices[wall.v2];
-                    
-                    context.line(v1.x * scale, v1.y * scale,
-                                 v2.x * scale, v2.y * scale,
-                                 wall.portal ? "#00ff00" : "#000");
-                }
+                context.line(v1.x * scale, v1.y * scale,
+                             v2.x * scale, v2.y * scale,
+                             wall.portal ? "#00ff00" : "#000");
             }
         };
         
-        // Draw all the vertices
-        var drawVertices = function (context, map, scale)
+        // Draw all the vertices from a specific sector
+        var drawVertices = function (context, sector, scale)
         {
-            for (var s = 0; s < map.sectors.length; s++) {
-                for (var v = 0; v < map.sectors[s].vertices.length; v++) {
-                    var vertex = map.sectors[s].vertices[v];
-                    context.circle(vertex.x * scale, vertex.y * scale, 2, "#ff0000");
-                }
+            for (var v = 0; v < sector.vertices.length; v++) {
+                var vertex = sector.vertices[v];
+                context.circle(vertex.x * scale, vertex.y * scale, 2, "#ff0000");
+            }
+        };
+        
+        // Recursively draw all vectrices and walls from a specific sector and its subsectors
+        var drawSector = function (context, sector, scale)
+        {
+            drawWalls(context, sector, scale);
+            drawVertices(context, sector, scale);
+            
+            for (var s = 0, max = sector.childsectors.length; s < max; s++) {
+                drawSector(context, sector.childsectors[s], scale);
             }
         };
         
         // Draw the player
         var drawPlayer = function (context, player, scale)
         {
-            context.circle(Math.floor(player.x * scale), Math.floor(player.y * scale), 5, "#ff0000");
+            context.circle(Math.floor(player.x * scale), Math.floor(player.y * scale), 3, "#ff0000");
             
             // Visualize the viewing range on the map
             var constants = TechEngine.Global.constants,
@@ -69,7 +75,7 @@ TechEngine.Rendering = function ()
             
             for (var i = 0, max = constants.screenSize.w; i < max; i += rayStep) 
             {
-                var distance = 200;
+                var distance = 100;
                     deltax = Math.floor(Math.cos(angle.radians) * Math.abs(distance)),
                     deltay = Math.floor(Math.sin(angle.radians) * Math.abs(distance));
                 
@@ -90,9 +96,11 @@ TechEngine.Rendering = function ()
                 
             context.clear();
             context.square(0, 0, global.constants.screenSize.w, global.constants.screenSize.h, "#fff");
-
-            drawWalls(context, map, scale);
-            drawVertices(context, map, scale);
+            
+            for (var s = 0; s < map.sectors.length; s++) {
+                drawSector(context, map.sectors[s], scale);
+            }
+            
             drawPlayer(context, global.player, scale);
         };
         
@@ -102,9 +110,58 @@ TechEngine.Rendering = function ()
         };
     }();
     
+    // Namespace: TechEngine.Rendering.Scene
+    // Handles rendering of the 3D scene
+    var Scene = function ()
+    {
+        // Render the sky background
+        var renderSky = function (context, image)
+        {
+            var skyX = image.width - parseInt(TechEngine.Global.player.angle.degrees * (image.width / 360)),
+                screenSize = TechEngine.Global.constants.screenSize,
+                skyWidth = screenSize.w,
+                leftOverWidth = 0;
+                
+            if (skyX + skyWidth > image.width) {
+                leftOverWidth = skyX + skyWidth - image.width;
+                skyWidth -= leftOverWidth;
+            }
+            
+            if (skyWidth > 0) {
+                context.drawImage(image,
+                                  skyX, 0, skyWidth, screenSize.h / 2,
+                                  0, 0, skyWidth, screenSize.h / 2);
+            }
+
+            if (leftOverWidth > 0) {
+                context.drawImage(image,
+                                  0, 0, leftOverWidth, screenSize.h / 2,
+                                  skyWidth, 0, leftOverWidth, screenSize.h / 2);
+            }
+        };
+        
+        // Render the 3D scene
+        var render = function ()
+        {
+            var global = TechEngine.Global,
+                context = global.contextScene,
+                map = global.activeMap;
+                
+            context.clear();
+            context.square(0, 0, global.constants.screenSize.w, global.constants.screenSize.h, "#fff");
+            
+            renderSky(context, map.background);
+        };
+        
+        return {
+            render: render
+        };
+    }();
+    
     return {
         Map: Map,
-        updateWatch: updateWatch
+        Scene: Scene,
+        updateWatchWindow: updateWatchWindow
     };
 }();
 
