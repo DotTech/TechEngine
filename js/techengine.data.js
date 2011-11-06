@@ -84,6 +84,34 @@ TechEngine.Data = function ()
         };
     };
     
+    // Drawing parameters for a vertical slice (scanline) of an object
+    var VSliceDrawParams = function () 
+    {
+        return {
+            dy1: 0,         // Destination start Y coord
+            dy2: 0,         // Destination end Y coord
+            sy1: 0,         // Source image start Y coord
+            sy2: 0,         // Source image end Y coord
+            texture: null   // Image object containing the texture or sprite to draw
+        };
+    };
+    
+    // Definition of an intersection with a wall or object in the game world
+    var intersection = function () 
+    {
+        return {
+            x: 0,               // X coordinate of this intersection
+            y: 0,               // Y coordinate of this intersection
+            distance: 0,        // Distance from source (player) to the intersection
+            resourceId: 0,      // index of texture or sprite image in Objects namespace
+            levelObjectId: 0,   // index of texture or sprite in Objects.Level namespace
+            textureX: 0,        // X coordinate of the texture scanline to draw
+            isSprite: false,    // true if intersection is for a sprite, otherwise its for a wall
+            drawParams: null    // VSliceDrawParams object for this intersection
+        };
+    };
+    
+    
     /**
      * Loading of game resources
      */
@@ -115,6 +143,8 @@ TechEngine.Data = function ()
         sector: sector,
         map: map,
         keyButton: keyButton,
+        VSliceDrawParams: VSliceDrawParams,
+        intersection: intersection,
         
         // Resource arrays
         maps: maps,

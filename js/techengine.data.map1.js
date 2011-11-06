@@ -141,7 +141,8 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
         data.wall(1, 2, false, wallSide, wallSide),
         data.wall(2, 3, false, wallSide, wallSide),
         data.wall(3, 4, false, wallSide, wallSide),
-        data.wall(4, 5, false, wallSide, wallSide)
+        data.wall(4, 5, false, wallSide, wallSide),
+        data.wall(5, 0, true, wallSide, wallSide)
     ];
     
     data.maps[0] = map;

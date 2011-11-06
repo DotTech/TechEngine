@@ -3,6 +3,10 @@ TechEngine.log("Loading 'techengine.rendering.js'...", true);
 /*
 //  Namespace:      TechEngine.Rendering
 //  Description:    Functions for rendering the map and 3D scene
+//
+//  Public methods: Map.render()
+//                  Scene.render()
+//                  updateWatchWindow()
 */
 TechEngine.Rendering = function ()
 {
@@ -19,8 +23,26 @@ TechEngine.Rendering = function ()
                 player = TechEngine.Global.player,
                 pinfo = "Player { x: " + player.x + ", y: " + player.y + ", z: " + player.z + ", height: " + player.height + ", width: " + player.width + ", angle: " + player.angle.degrees + "}<br />";
                 watch = fpsinfo + pinfo;
-         
-            win.innerHTML = watch;
+            
+            // Display which sectors the player is located in
+            var map = TechEngine.Global.activeMap,
+                sectorinfo = "Located in sector(s):";
+            
+            var getSectorInfo = function (sectors)
+            {
+                for (var i = 0, max = sectors.length; i < max; i++) {
+                    if (TechEngine.Math.isPointInPolygon(player, sectors[i].vertices)) {
+                        sectorinfo += " &gt; " + i;
+                        
+                        if (sectors[i].childsectors.length > 0) {
+                            getSectorInfo(sectors[i].childsectors);
+                        }
+                    }
+                }
+            };
+            getSectorInfo(map.sectors);
+            
+            win.innerHTML = watch + sectorinfo;
             lastFpsUpdate = new Date().getTime();
         }
     }
@@ -140,17 +162,49 @@ TechEngine.Rendering = function ()
             }
         };
         
+        // Draw the vertical slice for a wall
+        var renderWall = function(context, vscan, intersection)
+        {
+            context.lineSquare(vscan, 100,  1, 300, "#990000");
+            
+            /*var drawParams = intersection.drawParams;
+                
+            if (objects.settings.renderTextures()) {
+                // Draw wall slice with texture
+                context.drawImage(drawParams.texture, 
+                                  intersection.textureX, drawParams.sy1, 1, drawParams.sy2 - drawParams.sy1,
+                                  vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
+            }
+            else {
+                // Draw without textures
+                context.lineSquare(vscan, drawParams.dy1,  1, drawParams.dy2, drawing.colorRgb(128, 0, 0));
+            }
+            
+            // Make walls in the distance appear darker
+            if (objects.settings.renderLighting() && intersection.distance > constants.startFadingAt) {
+                context.lineSquare(vscan, drawParams.dy1, 1, drawParams.dy2, drawing.colorRgba(0, 0, 0, calcDistanceOpacity(intersection.distance)))
+            }*/
+        }
+        
         // Render the 3D scene
         var render = function ()
         {
             var global = TechEngine.Global,
+                constants = global.constants,
                 context = global.contextScene,
                 map = global.activeMap;
                 
             context.clear();
-            context.square(0, 0, global.constants.screenSize.w, global.constants.screenSize.h, "#fff");
+            context.square(0, 0, constants.screenSize.w, constants.screenSize.h, "#fff");
             
             renderSky(context, map.background);
+            
+            // Render walls and objects
+            var angle = new TechEngine.Math.Angle(global.player.angle.degrees + constants.fieldOfView / 2);
+            for (var vscan = 0; vscan < constants.screenSize.w; vscan++)  {
+                renderWall(context, vscan, angle);
+                angle.turn(-constants.angleBetweenRays);
+            }
         };
         
         return {
@@ -161,6 +215,7 @@ TechEngine.Rendering = function ()
     return {
         Map: Map,
         Scene: Scene,
+        Core: {},
         updateWatchWindow: updateWatchWindow
     };
 }();

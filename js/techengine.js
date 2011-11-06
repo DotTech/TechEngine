@@ -19,7 +19,8 @@ var TechEngine =
     // Include files in loading order
     includes: [ "js/techengine.math.js", "js/techengine.global.js", "js/techengine.data.js", 
                 "js/techengine.data.map1.js", "js/techengine.canvas.js", "js/techengine.rendering.js",
-                "js/techengine.player.js", "js/techengine.input.js", "js/techengine.main.js" ],
+                "js/techengine.rendering.core.js",  "js/techengine.player.js", "js/techengine.input.js", 
+                "js/techengine.main.js" ],
     
     // Namespaces used in this application
     Global:     {},
