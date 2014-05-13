@@ -10,22 +10,24 @@ TechEngine.log("Loading 'techengine.rendering.js'...", true);
 */
 TechEngine.Rendering = function ()
 {
-    var lastFpsUpdate = new Date().getTime();
+    var global = TechEngine.Global,
+        constants = global.constants,
+        lastFpsUpdate = new Date().getTime();
     
     // Updates the values in the watch window
     var updateWatchWindow = function ()
     {
-        var win = TechEngine.Global.watchWindow;
+        var win = global.watchWindow;
         
         if (typeof win != "undefined" && win != null) {
             var elapsed = new Date().getTime() - lastFpsUpdate,
                 fpsinfo = "<strong>" + Math.round(1000 / elapsed) + " </strong>fps<br />",
-                player = TechEngine.Global.player,
+                player = global.player,
                 pinfo = "Player { x: " + player.x + ", y: " + player.y + ", z: " + player.z + ", height: " + player.height + ", width: " + player.width + ", angle: " + player.angle.degrees + "}<br />";
                 watch = fpsinfo + pinfo;
             
             // Display which sectors the player is located in
-            var map = TechEngine.Global.activeMap,
+            var map = global.activeMap,
                 sectorinfo = "Located in sector(s):";
             
             var getSectorInfo = function (sectors)
@@ -61,7 +63,7 @@ TechEngine.Rendering = function ()
                 
                 context.line(v1.x * scale, v1.y * scale,
                              v2.x * scale, v2.y * scale,
-                             wall.portal ? "#00ff00" : "#000");
+                             wall.isPortal ? "#00ff00" : "#000");
             }
         };
         
@@ -91,8 +93,7 @@ TechEngine.Rendering = function ()
             context.circle(Math.floor(player.x * scale), Math.floor(player.y * scale), 3, "#ff0000");
             
             // Visualize the viewing range on the map
-            var constants = TechEngine.Global.constants,
-                angle = new TechEngine.Math.Angle(player.angle.degrees + constants.fieldOfView / 2),
+            var angle = new TechEngine.Math.Angle(player.angle.degrees + constants.fieldOfView / 2),
                 rayStep = 10;
             
             for (var i = 0, max = constants.screenSize.w; i < max; i += rayStep) 
@@ -102,28 +103,26 @@ TechEngine.Rendering = function ()
                     deltay = Math.floor(Math.sin(angle.radians) * Math.abs(distance));
                 
                 context.line(player.x * scale, player.y * scale, 
-                            (player.x + deltax) * scale, (player.y - deltay) * scale, TechEngine.Math.colorRgb(200, 200, 0));
+                            (player.x + deltax) * scale, (player.y - deltay) * scale, context.rgb(200, 200, 0));
                 
-                angle.turn(-TechEngine.Global.angleBetweenRays * rayStep);
+                angle.turn(-global.angleBetweenRays * rayStep);
             }
         };
         
         // Render the top-down view of the map
         var render = function ()
         {
-            var global = TechEngine.Global,
-                context = global.contextMap,
-                scale = global.constants.mapScale,
+            var context = global.contextMap,
                 map = global.activeMap;
                 
             context.clear();
-            context.square(0, 0, global.constants.screenSize.w, global.constants.screenSize.h, "#fff");
+            context.square(0, 0, constants.screenSize.w, constants.screenSize.h, "#fff");
             
             for (var s = 0; s < map.sectors.length; s++) {
-                drawSector(context, map.sectors[s], scale);
+                drawSector(context, map.sectors[s], constants.mapScale);
             }
             
-            drawPlayer(context, global.player, scale);
+            drawPlayer(context, global.player, constants.mapScale);
         };
         
         // Reveal public module members
@@ -136,11 +135,13 @@ TechEngine.Rendering = function ()
     // Handles rendering of the 3D scene
     var Scene = function ()
     {
+        var context;
+        
         // Render the sky background
-        var renderSky = function (context, image)
+        var renderSky = function (image)
         {
-            var skyX = image.width - parseInt(TechEngine.Global.player.angle.degrees * (image.width / 360)),
-                screenSize = TechEngine.Global.constants.screenSize,
+            var skyX = image.width - parseInt(global.player.angle.degrees * (image.width / 360)),
+                screenSize = constants.screenSize,
                 skyWidth = screenSize.w,
                 leftOverWidth = 0;
                 
@@ -163,47 +164,86 @@ TechEngine.Rendering = function ()
         };
         
         // Draw the vertical slice for a wall
-        var renderWall = function(context, vscan, intersection)
+        var renderWall = function (vscan, intersection)
         {
-            context.lineSquare(vscan, 100,  1, 300, "#990000");
-            
-            /*var drawParams = intersection.drawParams;
+            var drawParams = intersection.drawParams;
                 
-            if (objects.settings.renderTextures()) {
+            /*if (objects.settings.renderTextures()) {
                 // Draw wall slice with texture
                 context.drawImage(drawParams.texture, 
                                   intersection.textureX, drawParams.sy1, 1, drawParams.sy2 - drawParams.sy1,
                                   vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
             }
-            else {
+            else {*/
                 // Draw without textures
-                context.lineSquare(vscan, drawParams.dy1,  1, drawParams.dy2, drawing.colorRgb(128, 0, 0));
-            }
+                context.lineSquare(vscan, drawParams.dy1,  1, drawParams.dy2, "#990000");
+            //}
             
             // Make walls in the distance appear darker
-            if (objects.settings.renderLighting() && intersection.distance > constants.startFadingAt) {
-                context.lineSquare(vscan, drawParams.dy1, 1, drawParams.dy2, drawing.colorRgba(0, 0, 0, calcDistanceOpacity(intersection.distance)))
+            var opacity = TechEngine.Rendering.Core.getDistanceOpacity(intersection.distance);
+            if (intersection.distance > constants.startFadingAt) {
+                context.lineSquare(vscan, drawParams.dy1, 1, drawParams.dy2, context.rgba(0, 0, 0, opacity));
+            }
+        }
+        
+        // Draw the vertical slice for a sprite
+        var renderSprite = function (vscan, intersection)
+        {
+            /*if (objects.settings.renderSprites()) {
+                var drawParams = intersection.drawParams;
+                    
+                context.drawImage(drawParams.texture, 
+                                  intersection.textureX, drawParams.sy1, 1, drawParams.sy2 - drawParams.sy1,
+                                  vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
+
+                // Make sprites in the distance appear darker
+                if (objects.settings.renderLighting() && intersection.distance > constants.startFadingAt) {
+                    var opacity = calcDistanceOpacity(intersection.distance);
+                    
+                    // There is a black image mask of every sprite located in the sprites array, one index after the original sprite.
+                    // Draw the mask over the sprite using the calculated opacity
+                    if (opacity > 0) {
+                        context.globalAlpha = opacity;
+                        context.drawImage(objects.sprites[intersection.resourceIndex + 1], 
+                                          intersection.textureX, drawParams.sy1, 1, drawParams.sy2 - drawParams.sy1,
+                                          vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
+                        context.globalAlpha = 1;
+                    }
+                }
             }*/
         }
         
         // Render the 3D scene
         var render = function ()
         {
-            var global = TechEngine.Global,
-                constants = global.constants,
-                context = global.contextScene,
-                map = global.activeMap;
+            var map = global.activeMap;
                 
+            context = global.contextScene;
             context.clear();
             context.square(0, 0, constants.screenSize.w, constants.screenSize.h, "#fff");
             
-            renderSky(context, map.background);
+            // Render sky background
+            renderSky(map.background);
             
-            // Render walls and objects
+            // Render walls and sprites
             var angle = new TechEngine.Math.Angle(global.player.angle.degrees + constants.fieldOfView / 2);
-            for (var vscan = 0; vscan < constants.screenSize.w; vscan++)  {
-                renderWall(context, vscan, angle);
-                angle.turn(-constants.angleBetweenRays);
+            
+            for (var vscan = 0, max = constants.screenSize.w; vscan < max; vscan++)  {
+                // Search for walls and sprites in given direction and draw the vertical scanline for them.
+                // All objects in visible range will be drawn in order of distance.
+                var intersections = TechEngine.Rendering.Core.findObjects(angle, vscan);
+                
+                // Draw found objects for each found intersection back-to-front 
+                for (var i = 0, maxi = intersections.length; i < maxi; i++) {
+                    var intersection = intersections[i];
+                    if (intersection.isSprite) {
+                        renderSprite(vscan, intersection);
+                    }
+                    else {
+                        renderWall(vscan, intersection);
+                    }
+                }
+                angle.turn(-global.angleBetweenRays);
             }
         };
         

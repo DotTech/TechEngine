@@ -24,12 +24,13 @@ TechEngine.Data = function ()
     };
     
     // Wall structure
-    var wall = function (v1, v2, portal, front, back) 
+    var wall = function (v1, v2, isPortal, portalSectorId, front, back) 
     {
         return { 
             v1: v1,         // From vertex
             v2: v2,         // To vertex
-            portal: portal, // Is this wall a sector portal?
+            isPortal: isPortal,             // true if this wall is a portal to another sector
+            portalSectorId: portalSectorId, // Id of the sector this wall is a portal to
             front: front,   // Front side (visible from inside the sector)
             back: back      // Back side (visible from outside the sector)
         };

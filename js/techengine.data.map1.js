@@ -34,17 +34,17 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[0].walls = [
-        data.wall(0, 1, false, wallSide, wallSide),
-        data.wall(1, 2, false, wallSide, wallSide),
-        data.wall(2, 3, false, wallSide, wallSide),
-        data.wall(3, 4, true, wallSide, wallSide),
-        data.wall(4, 5, false, wallSide, wallSide),
-        data.wall(5, 6, false, wallSide, wallSide),
-        data.wall(6, 7, false, wallSide, wallSide),
-        data.wall(7, 0, false, wallSide, wallSide)
+        data.wall(0, 1, false, 0, wallSide, wallSide),
+        data.wall(1, 2, false, 0, wallSide, wallSide),
+        data.wall(2, 3, false, 0, wallSide, wallSide),
+        data.wall(3, 4, true, 1, wallSide, wallSide),
+        data.wall(4, 5, false, 0, wallSide, wallSide),
+        data.wall(5, 6, false, 0, wallSide, wallSide),
+        data.wall(6, 7, false, 0, wallSide, wallSide),
+        data.wall(7, 0, false, 0, wallSide, wallSide)
     ];
     
-    map.sectors[0].childsectors = [
+    /*map.sectors[0].childsectors = [
         data.sector(32, 96, 0, 0),
     ];
     
@@ -62,7 +62,7 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
             data.wall(2, 3, false, wallSide, wallSide),
             data.wall(3, 4, false, wallSide, wallSide),
             data.wall(4, 0, false, wallSide, wallSide)
-        ];
+        ];*/
     
     map.sectors[1].vertices = [
         data.vertex(800, 300),  // 0
@@ -80,21 +80,21 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[1].walls = [
-        data.wall(0, 1, false, wallSide, wallSide),
-        data.wall(1, 2, false, wallSide, wallSide),
-        data.wall(2, 3, false, wallSide, wallSide),
-        data.wall(3, 4, false, wallSide, wallSide),
-        data.wall(4, 5, false, wallSide, wallSide),
-        data.wall(5, 6, false, wallSide, wallSide),
-        data.wall(6, 7, false, wallSide, wallSide),
-        data.wall(7, 8, true, wallSide, wallSide),
-        data.wall(8, 9, false, wallSide, wallSide),
-        data.wall(9, 10, false, wallSide, wallSide),
-        data.wall(10, 11, false, wallSide, wallSide),
-        data.wall(11, 0, true, wallSide, wallSide)
+        data.wall(0, 1, false, 0, wallSide, wallSide),
+        data.wall(1, 2, false, 0, wallSide, wallSide),
+        data.wall(2, 3, false, 0, wallSide, wallSide),
+        data.wall(3, 4, false, 0, wallSide, wallSide),
+        data.wall(4, 5, false, 0, wallSide, wallSide),
+        data.wall(5, 6, false, 0, wallSide, wallSide),
+        data.wall(6, 7, false, 0, wallSide, wallSide),
+        data.wall(7, 8, true, 2, wallSide, wallSide),
+        data.wall(8, 9, false, 0, wallSide, wallSide),
+        data.wall(9, 10, false, 0, wallSide, wallSide),
+        data.wall(10, 11, false, 0, wallSide, wallSide),
+        data.wall(11, 0, true, 0, wallSide, wallSide)
     ];
     
-    map.sectors[1].childsectors = [
+    /*map.sectors[1].childsectors = [
         data.sector(176, 176, 0, 0),
         data.sector(50, 176, 0, 0)
     ];
@@ -125,7 +125,7 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
             data.wall(1, 2, false, wallSide, wallSide),
             data.wall(2, 3, false, wallSide, wallSide),
             data.wall(3, 0, false, wallSide, wallSide),
-        ];
+        ];*/
     
     map.sectors[2].vertices = [
         data.vertex(1600, 700), // 0
@@ -137,12 +137,12 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[2].walls = [
-        data.wall(0, 1, false, wallSide, wallSide),
-        data.wall(1, 2, false, wallSide, wallSide),
-        data.wall(2, 3, false, wallSide, wallSide),
-        data.wall(3, 4, false, wallSide, wallSide),
-        data.wall(4, 5, false, wallSide, wallSide),
-        data.wall(5, 0, true, wallSide, wallSide)
+        data.wall(0, 1, false, 0, wallSide, wallSide),
+        data.wall(1, 2, false, 0, wallSide, wallSide),
+        data.wall(2, 3, false, 0, wallSide, wallSide),
+        data.wall(3, 4, false, 0, wallSide, wallSide),
+        data.wall(4, 5, false, 0, wallSide, wallSide),
+        data.wall(5, 0, true, 1, wallSide, wallSide)
     ];
     
     data.maps[0] = map;

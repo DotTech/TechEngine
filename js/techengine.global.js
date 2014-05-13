@@ -12,6 +12,7 @@ TechEngine.Global = function ()
         screenSize: { w: 480, h: 360 }, // Size of the projection plane
         moveStepSize: 9,                // How much the player moves each step
         turnStepSize: 3,                // How many degrees the player turns
+        startFadingAt: 100,             // At what distance to start fading visibility
         glIntervalTimeout: 20,          // Gameloop interval timeout
         canvasIdScene: "scene",         // ID of canvas element to render the scene on
         canvasIdMap: "map",             // ID of canvas element to render the map on
@@ -26,6 +27,7 @@ TechEngine.Global = function ()
         glInterval,
         player,
         angleBetweenRays = parseFloat(constants.fieldOfView / constants.screenSize.w),
+        distanceToViewport = Math.round(constants.screenSize.w / 2 / Math.tan(constants.fieldOfView / 2 * (Math.PI / 180)));
         watchWindow = document.getElementById("watch");
     
     // Initialize canvas contexts
@@ -45,6 +47,7 @@ TechEngine.Global = function ()
         keys: keys,
         glInterval: glInterval,
         angleBetweenRays: angleBetweenRays,
+        distanceToViewport: distanceToViewport,
         watchWindow: watchWindow,
         player: player,
     }

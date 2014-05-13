@@ -12,7 +12,7 @@ TechEngine.Global.player = new function ()
     this.y = 0;
     this.z = 0;
     this.width = 0;
-    this.height = 0;
+    this.height = 48;
     this.angle = new TechEngine.Math.Angle(0);
     
     // Make the player turn by increasing its viewing angle

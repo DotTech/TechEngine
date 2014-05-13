@@ -10,7 +10,17 @@ CanvasRenderingContext2D.prototype.clear = function()
 {
     this.clearRect(0, 0, this.canvas.width, this.canvas.height);
 };
-    
+
+CanvasRenderingContext2D.prototype.rgb = function (r, g, b)
+{
+    return "rgb(" + r + ", " + g + ", " + b + ")";
+}
+
+CanvasRenderingContext2D.prototype.rgba = function (r, g, b, a)
+{
+    return "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
+}
+
 // Draws a circle
 CanvasRenderingContext2D.prototype.circle = function(x, y, radius, color) 
 {

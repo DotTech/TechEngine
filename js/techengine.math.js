@@ -66,11 +66,6 @@ TechEngine.Math = function ()
         this.setValue(degrees);
     };
     
-    var colorRgb = function (r, g, b)
-    {
-        return "rgb(" + r + ", " + g + ", " + b + ")";
-    }
-    
     // Calculate difference in x and y for a distance at a specific angle
     var getDeltaXY = function(angle, distance) 
     {
@@ -111,8 +106,8 @@ TechEngine.Math = function ()
     // Determine wether an intersection is located in the quadrant we are looking at
     var isCorrectQuadrant = function(intersection, angle)
     {
-        var deltaX = player.x - intersection.x,
-            deltaY = player.y - intersection.y,
+        var deltaX = TechEngine.Global.player.x - intersection.x,
+            deltaY = TechEngine.Global.player.y - intersection.y,
             quadrant = 0;
         
         var roundedAngle = ~~ (0.5 + angle.degrees);
@@ -138,10 +133,12 @@ TechEngine.Math = function ()
     }
     
     // Calculate ray intersection point on a line
-    var getIntersection = function(line, angle, dontRoundCoords) 
+    var getIntersection = function(v1, v2, angle, dontRoundCoords) 
     {
         // Ray vector
-        var px1 = player.x,
+        var line = { x1: v1.x, x2: v2.x, y1: v1.y, y2: v2.y },
+            player = TechEngine.Global.player,
+            px1 = player.x,
             py1 = player.y,
             px2 = px1 + Math.cos(angle.radians),
             py2 = py1 - Math.sin(angle.radians);
@@ -152,7 +149,7 @@ TechEngine.Math = function ()
                  ((line.y2 - line.y1) * (px2 - px1) - (line.x2 - line.x1) * (py2 - py1));
         
         // Calculate where the ray intersects with the line
-        var i = classes.Intersection();
+        var i = TechEngine.Data.intersection();
             i.x = px1 + f1 * (px2 - px1),
             i.y = py1 + f1 * (py2 - py1);
         
@@ -204,7 +201,6 @@ TechEngine.Math = function ()
     
     return {
         Angle: Angle,
-        colorRgb: colorRgb,
         getDeltaXY: getDeltaXY,
         isPointInPolygon: isPointInPolygon,
         getIntersection: getIntersection
