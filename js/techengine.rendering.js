@@ -150,7 +150,7 @@ TechEngine.Rendering = function ()
         // Render the sky background
         var renderSky = function (image)
         {
-            var skyX = image.width - parseInt(global.player.angle.degrees * (image.width / 360)),
+            var skyX = (image.width - parseInt(global.player.angle.degrees * (image.width / 360))),
                 screenSize = constants.screenSize,
                 skyWidth = screenSize.w,
                 leftOverWidth = 0;
@@ -178,6 +178,10 @@ TechEngine.Rendering = function ()
         {
             var drawParams = intersection.drawParams;
                 
+            if (drawParams == null) {
+                return;
+            }
+
             //if (objects.settings.renderTextures()) {
                 // Draw wall slice with texture
                 /*context.drawImage(drawParams.texture, 
@@ -190,7 +194,7 @@ TechEngine.Rendering = function ()
             //}
             
             context.drawImage(drawParams.texture, 
-                              drawParams.sx, drawParams.sy1, 1, drawParams.sy2 - drawParams.sy1,
+                              drawParams.tx, drawParams.ty1, 1, drawParams.ty2 - drawParams.ty1,
                               vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
 
             // Make walls in the distance appear darker

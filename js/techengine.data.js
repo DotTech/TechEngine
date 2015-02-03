@@ -86,16 +86,17 @@ TechEngine.Data = function ()
         };
     };
     
-    // Drawing parameters for a vertical slice (scanline) of an object
-    var VSliceDrawParams = function () 
+    // Drawing parameters for a vertical scanline of an object
+    var VScanDrawParams = function () 
     {
         return {
-            dy1: 0,         // Destination start Y coord
-            dy2: 0,         // Destination end Y coord
-            sy1: 0,         // Source (texture) image start Y coord
-            sy2: 0,         // Source (texture) image end Y coord,
-            sx: 0,          // Source (texture) image X coord,
-            texture: null   // Image object containing the texture or sprite to draw
+            sy1: 0, // Scanline start Y coord (potentially off-screen)
+            sy2: 0, // Scanline end Y coord (potentially off-screen)
+            dy1: 0, // Destination start Y coord (on screen)
+            dy2: 0, // Destination end Y coord (on screen)
+            ty1: 0, // Texture image start Y coord
+            ty2: 0, // Texture image end Y coord
+            tx: 0   // Texture image X coord
         };
     };
     
@@ -103,6 +104,8 @@ TechEngine.Data = function ()
     var intersection = function () 
     {
         return {
+            v1: null,           // Vertex 1
+            v2: null,           // Vertex 2
             x: 0,               // X coordinate of this intersection
             y: 0,               // Y coordinate of this intersection
             distance: 0,        // Distance from source (player) to the intersection
@@ -164,7 +167,7 @@ TechEngine.Data = function ()
         map: map,
         texture: texture,
         keyButton: keyButton,
-        VSliceDrawParams: VSliceDrawParams,
+        VScanDrawParams: VScanDrawParams,
         intersection: intersection,
         
         // Resource arrays

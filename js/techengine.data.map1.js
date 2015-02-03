@@ -16,20 +16,26 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
 
     // Textures and background
     map.textures = [
-        data.texture("img/bricks-brown.png") // 0
+        data.texture("img/bricks-brown.png"),    // 0
+        data.texture("img/bricks-gray.png"),     // 1
+        data.texture("img/rockwall.png"),        // 2
+        data.texture("img/tiles-bluegreen.png"), // 3
+        data.texture("img/tiles-street.png")     // 4
     ];
 
     map.background.src = "img/sky.jpg";
 
-    wallSide = data.wallside(map.textures[0], map.textures[0], map.textures[0]);
+    wallSideBricksBrown = data.wallside(map.textures[0], map.textures[0], map.textures[0]);
+    wallSideBricksGray = data.wallside(map.textures[1], map.textures[1], map.textures[1]);
+    wallSideRockWall = data.wallside(map.textures[2], map.textures[2], map.textures[2]);
 
     // Sectors, vertices and walls.
     map.sectors = [
-        data.sector(0, 158, 0, 0),
-        data.sector(32, 226, 0, 0),
-        data.sector(0, 178, 0, 0),
-        data.sector(32, 150, 0, 0),
-        data.sector(32, 190, 0, 0)
+        data.sector(0, 80, 3, 2),
+        data.sector(32, 226, 4, 2),
+        data.sector(0, 178, 3, 2),
+        data.sector(32, 150, 2, 2),
+        data.sector(32, 190, 4, 2)
     ];
     
     map.sectors[0].vertices = [
@@ -44,14 +50,14 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[0].walls = [
-        data.wall(0, 1, false, 0, wallSide, wallSide),
-        data.wall(1, 2, false, 0, wallSide, wallSide),
-        data.wall(2, 3, false, 0, wallSide, wallSide),
-        data.wall(3, 4, true, 1, wallSide, wallSide),
-        data.wall(4, 5, false, 0, wallSide, wallSide),
-        data.wall(5, 6, false, 0, wallSide, wallSide),
-        data.wall(6, 7, false, 0, wallSide, wallSide),
-        data.wall(7, 0, false, 0, wallSide, wallSide)
+        data.wall(0, 1, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(1, 2, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(2, 3, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(3, 4, true, 1, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(4, 5, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(5, 6, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(6, 7, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(7, 0, false, 0, wallSideBricksBrown, wallSideBricksBrown)
     ];
     
     map.sectors[1].vertices = [
@@ -70,18 +76,18 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[1].walls = [
-        data.wall(0, 1, false, 0, wallSide, wallSide),
-        data.wall(1, 2, false, 0, wallSide, wallSide),
-        data.wall(2, 3, false, 0, wallSide, wallSide),
-        data.wall(3, 4, false, 0, wallSide, wallSide),
-        data.wall(4, 5, false, 0, wallSide, wallSide),
-        data.wall(5, 6, false, 0, wallSide, wallSide),
-        data.wall(6, 7, false, 0, wallSide, wallSide),
-        data.wall(7, 8, true, 2, wallSide, wallSide),
-        data.wall(8, 9, false, 0, wallSide, wallSide),
-        data.wall(9, 10, false, 0, wallSide, wallSide),
-        data.wall(10, 11, false, 0, wallSide, wallSide),
-        data.wall(11, 0, true, 0, wallSide, wallSide)
+        data.wall(0, 1, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(1, 2, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(2, 3, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(3, 4, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(4, 5, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(5, 6, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(6, 7, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(7, 8, true, 2, wallSideBricksGray, wallSideBricksGray),
+        data.wall(8, 9, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(9, 10, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(10, 11, false, 0, wallSideBricksGray, wallSideBricksGray),
+        data.wall(11, 0, true, 0, wallSideBricksGray, wallSideBricksGray)
     ];
     
     map.sectors[2].vertices = [
@@ -95,13 +101,13 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[2].walls = [
-        data.wall(0, 1, false, 0, wallSide, wallSide),
-        data.wall(1, 2, false, 0, wallSide, wallSide),
-        data.wall(2, 3, false, 0, wallSide, wallSide),
-        data.wall(3, 4, false, 0, wallSide, wallSide),
-        data.wall(4, 5, true, 3, wallSide, wallSide),
-        data.wall(5, 6, false, 0, wallSide, wallSide),
-        data.wall(6, 0, true, 1, wallSide, wallSide)
+        data.wall(0, 1, false, 0, wallSideRockWall, wallSideRockWall),
+        data.wall(1, 2, false, 0, wallSideRockWall, wallSideRockWall),
+        data.wall(2, 3, false, 0, wallSideRockWall, wallSideRockWall),
+        data.wall(3, 4, false, 0, wallSideRockWall, wallSideRockWall),
+        data.wall(4, 5, true, 3, wallSideRockWall, wallSideRockWall),
+        data.wall(5, 6, false, 0, wallSideRockWall, wallSideRockWall),
+        data.wall(6, 0, true, 1, wallSideRockWall, wallSideRockWall)
     ];
     
     map.sectors[3].vertices = [
@@ -114,12 +120,12 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[3].walls = [
-        data.wall(0, 1, true, 2, wallSide, wallSide),
-        data.wall(1, 2, false, 0, wallSide, wallSide),
-        data.wall(2, 3, false, 0, wallSide, wallSide),
-        data.wall(3, 4, false, 0, wallSide, wallSide),
-        data.wall(4, 5, true, 4, wallSide, wallSide),
-        data.wall(5, 0, false, 0, wallSide, wallSide)
+        data.wall(0, 1, true, 2, wallSideRockWall, wallSideRockWall),
+        data.wall(1, 2, false, 0, wallSideRockWall, wallSideRockWall),
+        data.wall(2, 3, false, 0, wallSideRockWall, wallSideRockWall),
+        data.wall(3, 4, false, 0, wallSideRockWall, wallSideRockWall),
+        data.wall(4, 5, true, 4, wallSideRockWall, wallSideRockWall),
+        data.wall(5, 0, false, 0, wallSideRockWall, wallSideRockWall)
     ];
 
     map.sectors[4].vertices = [
@@ -132,12 +138,12 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[4].walls = [
-        data.wall(0, 1, true, 3, wallSide, wallSide),
-        data.wall(1, 2, false, 0, wallSide, wallSide),
-        data.wall(2, 3, false, 0, wallSide, wallSide),
-        data.wall(3, 4, false, 0, wallSide, wallSide),
-        data.wall(4, 5, false, 0, wallSide, wallSide),
-        data.wall(5, 0, false, 0, wallSide, wallSide)
+        data.wall(0, 1, true, 3, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(1, 2, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(2, 3, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(3, 4, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(4, 5, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(5, 0, false, 0, wallSideBricksBrown, wallSideBricksBrown)
     ];
 
     global.maps.push(map);

@@ -29,16 +29,8 @@ TechEngine.Rendering.Core = function ()
         
         fishbowlFixValue = Math.cos(distortRemove.radians);
     };
-
-    // Calculates the length of the hypotenuse side (angled side) of a triangle
-    // - adjacentLength: length of the side adjacent to the angle
-    // - oppositeLength: length of the side opposite of the angle
-    var getHypotenuseLength = function(adjacentLength, oppositeLength)
-    {
-        return Math.sqrt(Math.pow(Math.abs(adjacentLength), 2) + Math.pow(Math.abs(oppositeLength), 2));
-    }
     
-    // Once we know the distance to a wall or sprite, setVSliceDrawParams calculates the parameters 
+    // Once we know the distance to a wall or sprite, setVScanDrawParams calculates the parameters 
     // that are required to draw the textured vertical slice for it.
     // It also accounts for leaving away pixels of the object if it exceeds the size of the viewport.
     // Returns FALSE if the intersection is not visible to the player
@@ -49,29 +41,27 @@ TechEngine.Rendering.Core = function ()
     // The following parameters are calculated:
     // - dy1:       Starting point of the slice on the destination (the screen) 
     // - dy2:       End point of the slice on the destination
-    // - sy1:       Starting point of the slice on the source (the texture image)
-    // - sy2:       End point of the slice on the source
-    // - sx:        X-coord of the slice on the source
+    // - ty1:       Starting point of the slice on the texture image
+    // - ty2:       End point of the slice on the texture image
+    // - tx:        X-coord of the slice on the texture image
     // - texture:   Image object containing the texture to draw
-    var setVSliceDrawParams = function(intersection, sector)
+    var setVScanDrawParams = function(intersection, sector)
     {
         var scanlineOffsY = 0,                              // Additional Y-offset for the scanline (used in sprites)
-            distance =      intersection.distance * fishbowlFixValue, // Distance to the intersection
-            //rindex =        intersection.resourceIndex,     
-            //lindex =        intersection.levelObjectId,
-            //levelObject =   intersection.isSprite           // Level object definition (wall or sprite)
-            //                    ? Raycaster.Objects.Level.sprites[lindex] 
-            //                    : Raycaster.Objects.Level.walls[lindex],
-            texture =       TechEngine.Data.textures[0]; /*intersection.isSprite           // Image object containing the texture to draw
-                                ? objects.sprites[rindex] 
-                                : objects.textures[rindex],*/
-            objHeight =     intersection.isSprite           // Original height of the object at current intersection
-                                ? texture.height 
-                                : sector.ceilingHeight - sector.floorHeight,
-            objectZ =       intersection.isSprite           // Z-position of the object at current intersection
-                                ? levelObject.z
-                                : 0, //getWallZ(intersection),
-            height =        Math.floor(objHeight / distance * global.distanceToViewport);    // Height of the object on screen
+            distance = intersection.distance * fishbowlFixValue, // Distance to the intersection
+            objectHeight = sector.ceilingHeight - sector.floorHeight,
+            objectZ = 0, //sector.floorHeight,
+            height = Math.floor(objectHeight / distance * global.distanceToViewport);    // Height of the object on screen
+
+        /*
+        objHeight = intersection.isSprite           // Original height of the object at current intersection
+            ? texture.height 
+            : sector.ceilingHeight - sector.floorHeight,
+
+        objectZ = intersection.isSprite           // Z-position of the object at current intersection
+            ? levelObject.z
+            : 0, //getWallZ(intersection),
+        */
         
         // horizonOffset is used for aligning walls and objects correctly on the horizon.
         // Without this value, everything would always be vertically centered.
@@ -79,52 +69,78 @@ TechEngine.Rendering.Core = function ()
             base = (eyeHeight + global.player.z - objectZ) * 2,
             horizonOffset = (height - Math.floor(base / distance * global.distanceToViewport)) / 2;
         
+        // Create VScanDrawParams object.
+        intersection.drawParams = TechEngine.Data.VScanDrawParams();
+
         // Determine where to start and end the scanline on the screen
-        var scanlineEndY = parseInt((constants.screenSize.h / 2 - horizonOffset) + height / 2),
-            scanlineStartY = scanlineEndY - height;
-        
-        // Prevent the coordinates from being off-screen
-        intersection.drawParams = TechEngine.Data.VSliceDrawParams();
-        intersection.drawParams.dy1 = scanlineStartY < 0 ? 0 : scanlineStartY;
-        intersection.drawParams.dy2 = scanlineEndY > constants.screenSize.h ? constants.screenSize.h : scanlineEndY;
-        intersection.drawParams.texture = texture;
+        intersection.drawParams.sy2 = parseInt((constants.screenSize.h / 2 - horizonOffset) + height / 2); // Scanline end Y, potentially off screen
+        intersection.drawParams.sy1 = intersection.drawParams.sy2 - height; // Scanline start Y, potentially off screen
+
+        var test = intersection.drawParams.sy2 - intersection.drawParams.sy1;
+
+        // Set destination (screen) coordinates for scanline
+        intersection.drawParams.dy1 = intersection.drawParams.sy1;
+        intersection.drawParams.dy2 = intersection.drawParams.sy2;
+
+        // Prevent the destination coordinates from being off-screen
+        if (intersection.drawParams.sy1 < 0) {
+            intersection.drawParams.dy1 = 0;
+        }
+
+        if (intersection.drawParams.sy2 > constants.screenSize.h) {
+            intersection.drawParams.dy2 = constants.screenSize.h;
+        }
         
         if (intersection.drawParams.dy2 < 0 || intersection.drawParams.dy1 > constants.screenSize.h) {
+            intersection.drawParams = null;
             return false;
         }
         
-        // Now that we've determined the size and location of the scanline,
-        // we calculate which part of the texture image we need to render onto the scanline
-        // When part of the object is located outside of the screen we dont need to copy that part of the texture image.
-        //if ((!intersection.isSprite && objects.settings.renderTextures())
-        //    || (intersection.isSprite && objects.settings.renderSprites()))        
-        //{
-            var scale = height / texture.height, // Height ratio of the object compared to its original size
-                srcStartY = 0,                   // Start Y coord of source image data
-                srcEndY = texture.height;        // End y coord of source image data
-            
-            // Compensate for bottom part being offscreen
-            if (scanlineEndY > constants.screenHeight) {
-                var remove = (scanlineEndY - constants.screenHeight) / scale;
-                srcEndY -= remove;
-            }
-            
-            // Compensate for top part being offscreen
-            if (scanlineStartY < 0) {
-                var remove = Math.abs(scanlineStartY) / scale;
-                srcStartY += remove;
-            }
-            
-            intersection.drawParams.sy1 = srcStartY;
-            intersection.drawParams.sy2 = srcEndY;
-            
-            if (intersection.drawParams.sy2 <= intersection.drawParams.sy1) {
-                return false;
-            }
-        //}*/
-        
         return true;
     };
+
+    // Sets the wall texture drawing parameters on the intersection's VScanDrawParams
+    var setWallTexture = function(intersection, wall)
+    {
+        if (intersection.drawParams == null) {
+            return false;
+        }
+
+        var sheight = intersection.drawParams.sy2 - intersection.drawParams.sy1,   // Scanline height (may be to large for screen)
+            texture = wall.front.middleTexture, // TODO: Implement top & bottom textures
+            scale = sheight / texture.height,   // Height ratio of the scanline compared to its original size on the object
+            srcStartY = 0,                      // Start Y coord of source image data
+            srcEndY = texture.height;           // End y coord of source image data
+        
+        // Compensate for top part being offscreen
+        if (intersection.drawParams.sy1 < 0) {
+            var remove = Math.abs(intersection.drawParams.sy1) / scale;
+            srcStartY += remove;
+        }
+
+        // Compensate for bottom part being offscreen
+        if (intersection.drawParams.sy2 > constants.screenSize.h) {
+            var remove = (intersection.drawParams.sy2 - constants.screenSize.h) / scale;
+            srcEndY -= remove;
+        }
+        
+        // Set texture parameters
+        intersection.drawParams.texture = texture;
+        intersection.drawParams.ty1 = srcStartY;
+        intersection.drawParams.ty2 = srcEndY;
+        
+        if (intersection.drawParams.ty2 <= intersection.drawParams.ty1) {
+            // Texture height is negative, no need to draw anything.
+            intersection.drawParams = null;
+            return false;
+        }
+
+        // Determine the texture image X coordinate to use when copying the scanline.
+        var distanceToIntersection = TechEngine.Math.getHypotenuseLength(intersection.v1.x - intersection.x, intersection.v1.y - intersection.y);
+        intersection.drawParams.tx = parseInt(distanceToIntersection % texture.width);
+
+        return true;
+    }
 
     // Find intersection on a specific sprite that is in the players field of view
     var findSprite = function(angle, spriteId)
@@ -153,7 +169,7 @@ TechEngine.Rendering.Core = function ()
             
             // Calculate the drawing parameters for the vertical scanline for this sprite
             // If the sprite is not visible for the player the method returns false
-            if (!setVSliceDrawParams(intersection)) {
+            if (!setVScanDrawParams(intersection)) {
                 return false;
             }
         }
@@ -162,23 +178,26 @@ TechEngine.Rendering.Core = function ()
     };
     
     // Find intersection on a specific wall that is in the players field of view
-    var findWall = function(sector, angle, wallId)
+    var findWall = function(sector, angle, wall)
     {
         // Find intersection point on current wall
-        var v1 = sector.vertices[sector.walls[wallId].v1],
-            v2 = sector.vertices[sector.walls[wallId].v2],
-            intersection = TechEngine.Math.getIntersection(v1, v2, angle);
+        var v1 = sector.vertices[wall.v1],
+            v2 = sector.vertices[wall.v2],
+            math = TechEngine.Math,
+            intersection = math.getIntersection(v1, v2, angle);
         
         if (intersection) {
-            //intersection.levelObjectId = wallId;
-            //setTextureParams(intersection);
-            
+            // TODO: We're now skipping draw parameters if wall is portal, \
+            // must be implemented when top/bottom textures are implemented
+            if (wall.isPortal) {
+                return intersection;
+            }
+
             // Calculate the drawing parameters for the vertical scanline for this wall
-            setVSliceDrawParams(intersection, sector);
+            setVScanDrawParams(intersection, sector);
 
-            var lengthToIntersection = getHypotenuseLength(v1.x - intersection.x, v1.y - intersection.y);
-            intersection.drawParams.sx = parseInt(lengthToIntersection % TechEngine.Data.textures[0].width);
-
+            // Calculate the texture drawing parameters
+            setWallTexture(intersection, wall);
         }
         
         return intersection;
@@ -186,11 +205,11 @@ TechEngine.Rendering.Core = function ()
     
     // Find intersection for all the walls and sprites that are in the specified sector 
     // and inside the player's field of view.
-    // Returns z-buffer with intersection objects, sorted descending by distance
+    // Returns array with intersection objects, sorted descending by distance (closest first)
     var findObjects = function(angle, vscan, sectorId, foundSectors)
     {
         var map = global.activeMap,
-            intersections = new Array();        
+            intersections = [];        
 
         setFishbowlFixValue(vscan);
 
@@ -203,13 +222,14 @@ TechEngine.Rendering.Core = function ()
         // Find walls
         for (var i = 0; i < map.sectors[sectorId].walls.length; i++) {
             var sector = map.sectors[sectorId],
-                intersection = findWall(sector, angle, i);
+                wall = sector.walls[i],
+                intersection = findWall(sector, angle, wall);
                 
             if (intersection) {
             
-                if (sector.walls[i].isPortal) {
+                if (wall.isPortal) {
                     // Wall is a portal to another sector
-                    var connectedSectorid = sector.walls[i].portalSectorId;
+                    var connectedSectorid = wall.portalSectorId;
                     
                     // Remember the current and previous found sectors so we dont render them again
                     if (typeof foundSectors == "undefined" || foundSectors == null) {
@@ -220,23 +240,16 @@ TechEngine.Rendering.Core = function ()
                     TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
                     
                     // Find intersections in connected sector
-                    var sectorFoundBefore = false;
-                    for (var a = 0; a < foundSectors.length; a++) {
-                        if (foundSectors[a] == connectedSectorid) {
-                            sectorFoundBefore = true;
-                            break;
-                        }
-                    }
+                    var sectorFoundBefore = foundSectors.contains(connectedSectorid);
                     
                     if (!sectorFoundBefore) {
                         cintersections = findObjects(angle, vscan, connectedSectorid, foundSectors)
                         intersections = intersections.concat(cintersections);
                     }
                 }
-                else {
-                    intersections.push(intersection);
-                    TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
-                }
+
+                TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
+                intersections.push(intersection);
             }
         }
         
@@ -244,7 +257,7 @@ TechEngine.Rendering.Core = function ()
         /*for (var i = 0; i < Raycaster.Objects.Level.sprites.length; i++) {
             var intersection = findSprite(angle, i);
             if (intersection) {
-                intersections[intersections.length] = intersection;
+                intersections.push(intersection);
             }
         }*/
         
@@ -252,8 +265,6 @@ TechEngine.Rendering.Core = function ()
         intersections.sort(function(i1, i2) {
             return i2.distance - i1.distance;
         });
-        
-        // *** Remove occluded objects ***
         
         return intersections;
     };

@@ -6,15 +6,28 @@ TechEngine.log("Loading 'techengine.player.js'...", true);
 */
 TechEngine.Global.player = new function ()
 {
-    var constants = TechEngine.Global.constants;
+    var constants = TechEngine.Global.constants,
+        math = TechEngine.Math;
     
     this.x = 0;
     this.y = 0;
     this.z = 0;
     this.width = 0;
     this.height = constants.eyeHeight;
-    this.angle = new TechEngine.Math.Angle(0);
+    this.angle = new math.Angle(0);
     
+    // Checks for collision in a given direction
+    var collision = function(angle, threshold)
+    {
+        var objects = TechEngine.Rendering.Core.findObjects(angle, 0);
+        
+        if (objects.length > 0) {
+            return objects[0].distance < threshold;
+        }
+        
+        return false;
+    }
+
     // Make the player turn by increasing its viewing angle
     this.turn = function(angle)
     {
@@ -25,15 +38,17 @@ TechEngine.Global.player = new function ()
     this.walk = function(forward)
     {
         var step = forward ? constants.moveStepSize : -constants.moveStepSize,
-            delta = TechEngine.Math.getDeltaXY(this.angle, step);
+            delta = math.getDeltaXY(this.angle, step);
             
-        this.x = Math.round(this.x + delta.x);
-        this.y = Math.round(this.y - delta.y);
-        
-        /*angle = forward  ? player.angle  : new Raycaster.Classes.Angle(player.angle.degrees + 180);
-        var intersection = findIntersection(angle);        
-        if (!intersection || intersection.distance > 50) {
-        }*/
+        // Collision detection
+        var movementAngle = forward 
+            ? this.angle 
+            : new math.Angle(this.angle.degrees + 180);
+
+        if (!collision(movementAngle, 50)) {
+            this.x = Math.round(this.x + delta.x);
+            this.y = Math.round(this.y - delta.y);
+        }
     };
     
     // Elevate player up or down
@@ -51,18 +66,16 @@ TechEngine.Global.player = new function ()
     // Make player strafe left or right
     this.strafe = function(left)
     {
-        var math = TechEngine.Math,
-            angle = left 
+        var angle = left 
                 ? new math.Angle(this.angle.degrees + 90)
                 : new math.Angle(this.angle.degrees - 90),
             delta = math.getDeltaXY(angle, constants.moveStepSize);
         
-        this.x = Math.round(this.x + delta.x);
-        this.y = Math.round(this.y - delta.y);
-        
-        /*var intersection = findIntersection(angle);
-        if (!intersection || intersection.distance > 20) {
-        }*/
+        // Collision detection
+        if (!collision(angle, 20)) {
+            this.x = Math.round(this.x + delta.x);
+            this.y = Math.round(this.y - delta.y);
+        }
     };
 
 }();

@@ -131,12 +131,19 @@ TechEngine.Math = function ()
         
         return quadrant == angle.getQuadrant();
     }
+
+    // Calculates the length of the hypotenuse side (angled side) of a triangle
+    // - adjacentLength: length of the side adjacent to the angle
+    // - oppositeLength: length of the side opposite of the angle
+    var getHypotenuseLength = function(adjacentLength, oppositeLength)
+    {
+        return Math.sqrt(Math.pow(Math.abs(adjacentLength), 2) + Math.pow(Math.abs(oppositeLength), 2));
+    }
     
     // Calculate ray intersection point on a line
     var getIntersection = function(v1, v2, angle, dontRoundCoords) 
     {
-        // Ray vector
-        var line = { x1: v1.x, x2: v2.x, y1: v1.y, y2: v2.y },
+        var line = { x1: v1.x, x2: v2.x, y1: v1.y, y2: v2.y }, // Ray vector
             player = TechEngine.Global.player,
             px1 = player.x,
             py1 = player.y,
@@ -150,8 +157,11 @@ TechEngine.Math = function ()
         
         // Calculate where the ray intersects with the line
         var i = TechEngine.Data.intersection();
-            i.x = px1 + f1 * (px2 - px1),
-            i.y = py1 + f1 * (py2 - py1);
+
+        i.v1 = v1;
+        i.v2 = v2;
+        i.x = px1 + f1 * (px2 - px1),
+        i.y = py1 + f1 * (py2 - py1);
         
         // Check if intersection is located on the line
         var hit = true,
@@ -165,7 +175,7 @@ TechEngine.Math = function ()
         // When looking for walls we want to round the intersection coordinates before comparing them
         // When looking for sprites we dont want those coords rounded, otherwise the result is not exact enough
         if (!dontRoundCoords) {
-            // Round the numbers using bitwise rounding hack
+            // Round the numbers using bitwise rounding hack for speed
             intersX = ~~ (0.5 + i.x);
             intersY = ~~ (0.5 + i.y);
         }
@@ -173,6 +183,7 @@ TechEngine.Math = function ()
         hit = (linex1 >= linex2) 
             ? intersX <= linex1 && intersX >= linex2
             : intersX >= linex1 && intersX <= linex2;
+
         if (hit) {
             hit = (liney1 >= liney2)
                 ? intersY <= liney1 && intersY >= liney2
@@ -202,6 +213,7 @@ TechEngine.Math = function ()
     return {
         Angle: Angle,
         getDeltaXY: getDeltaXY,
+        getHypotenuseLength: getHypotenuseLength,
         isPointInPolygon: isPointInPolygon,
         getIntersection: getIntersection
     };
