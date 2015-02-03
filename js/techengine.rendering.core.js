@@ -29,8 +29,15 @@ TechEngine.Rendering.Core = function ()
         
         fishbowlFixValue = Math.cos(distortRemove.radians);
     };
+
+    // Calculates the length of the hypotenuse side (angled side) of a triangle
+    // - adjacentLength: length of the side adjacent to the angle
+    // - oppositeLength: length of the side opposite of the angle
+    var getHypotenuseLength = function(adjacentLength, oppositeLength)
+    {
+        return Math.sqrt(Math.pow(Math.abs(adjacentLength), 2) + Math.pow(Math.abs(oppositeLength), 2));
+    }
     
-    /*
     // Once we know the distance to a wall or sprite, setVSliceDrawParams calculates the parameters 
     // that are required to draw the textured vertical slice for it.
     // It also accounts for leaving away pixels of the object if it exceeds the size of the viewport.
@@ -44,8 +51,8 @@ TechEngine.Rendering.Core = function ()
     // - dy2:       End point of the slice on the destination
     // - sy1:       Starting point of the slice on the source (the texture image)
     // - sy2:       End point of the slice on the source
+    // - sx:        X-coord of the slice on the source
     // - texture:   Image object containing the texture to draw
-    */
     var setVSliceDrawParams = function(intersection, sector)
     {
         var scanlineOffsY = 0,                              // Additional Y-offset for the scanline (used in sprites)
@@ -55,7 +62,7 @@ TechEngine.Rendering.Core = function ()
             //levelObject =   intersection.isSprite           // Level object definition (wall or sprite)
             //                    ? Raycaster.Objects.Level.sprites[lindex] 
             //                    : Raycaster.Objects.Level.walls[lindex],
-            texture =       null, /*intersection.isSprite           // Image object containing the texture to draw
+            texture =       TechEngine.Data.textures[0]; /*intersection.isSprite           // Image object containing the texture to draw
                                 ? objects.sprites[rindex] 
                                 : objects.textures[rindex],*/
             objHeight =     intersection.isSprite           // Original height of the object at current intersection
@@ -89,9 +96,9 @@ TechEngine.Rendering.Core = function ()
         // Now that we've determined the size and location of the scanline,
         // we calculate which part of the texture image we need to render onto the scanline
         // When part of the object is located outside of the screen we dont need to copy that part of the texture image.
-        /*if ((!intersection.isSprite && objects.settings.renderTextures())
-            || (intersection.isSprite && objects.settings.renderSprites()))        
-        {
+        //if ((!intersection.isSprite && objects.settings.renderTextures())
+        //    || (intersection.isSprite && objects.settings.renderSprites()))        
+        //{
             var scale = height / texture.height, // Height ratio of the object compared to its original size
                 srcStartY = 0,                   // Start Y coord of source image data
                 srcEndY = texture.height;        // End y coord of source image data
@@ -114,7 +121,7 @@ TechEngine.Rendering.Core = function ()
             if (intersection.drawParams.sy2 <= intersection.drawParams.sy1) {
                 return false;
             }
-        }*/
+        //}*/
         
         return true;
     };
@@ -168,11 +175,14 @@ TechEngine.Rendering.Core = function ()
             
             // Calculate the drawing parameters for the vertical scanline for this wall
             setVSliceDrawParams(intersection, sector);
+
+            var lengthToIntersection = getHypotenuseLength(v1.x - intersection.x, v1.y - intersection.y);
+            intersection.drawParams.sx = parseInt(lengthToIntersection % TechEngine.Data.textures[0].width);
+
         }
         
         return intersection;
     };
-    
     
     // Find intersection for all the walls and sprites that are in the specified sector 
     // and inside the player's field of view.
@@ -181,11 +191,13 @@ TechEngine.Rendering.Core = function ()
     {
         var map = global.activeMap,
             intersections = new Array();        
+
         setFishbowlFixValue(vscan);
-        
+
         // Determine in which sector the player is located
         if (typeof sectorId == "undefined" || sectorId == null) {
             sectorId = getCurrentSectorId();
+            TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
         }
         
         // Find walls
@@ -201,16 +213,18 @@ TechEngine.Rendering.Core = function ()
                     
                     // Remember the current and previous found sectors so we dont render them again
                     if (typeof foundSectors == "undefined" || foundSectors == null) {
-                        foundSectors = new Array();
+                        foundSectors = [];
                     }
                     
                     foundSectors.push(sectorId);
+                    TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
                     
                     // Find intersections in connected sector
                     var sectorFoundBefore = false;
                     for (var a = 0; a < foundSectors.length; a++) {
                         if (foundSectors[a] == connectedSectorid) {
                             sectorFoundBefore = true;
+                            break;
                         }
                     }
                     
@@ -221,6 +235,7 @@ TechEngine.Rendering.Core = function ()
                 }
                 else {
                     intersections.push(intersection);
+                    TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
                 }
             }
         }
@@ -246,9 +261,12 @@ TechEngine.Rendering.Core = function ()
     // Calculates the opacity for the black overlay image that is used to make objects in the distance appear darker
     var getDistanceOpacity = function(distance) 
     {
-        var colorDivider = parseFloat(distance / (constants.startFadingAt * 1.5)); 
-        colorDivider = (colorDivider > 5) ? 5 : colorDivider;
+        var colorDivider = parseFloat(distance / constants.startFadingAt); 
         
+        if (colorDivider > 5) {
+            colorDivider = 5;
+        }
+
         return parseFloat(1 - 1 / colorDivider);
     };
     

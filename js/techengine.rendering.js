@@ -15,39 +15,49 @@ TechEngine.Rendering = function ()
         lastFpsUpdate = new Date().getTime();
     
     // Updates the values in the watch window
-    var updateWatchWindow = function ()
+    var WatchWindow = function ()
     {
-        var win = global.watchWindow;
-        
-        if (typeof win != "undefined" && win != null) {
-            var elapsed = new Date().getTime() - lastFpsUpdate,
-                fpsinfo = "<strong>" + Math.round(1000 / elapsed) + " </strong>fps<br />",
-                player = global.player,
-                pinfo = "Player { x: " + player.x + ", y: " + player.y + ", z: " + player.z + ", height: " + player.height + ", width: " + player.width + ", angle: " + player.angle.degrees + "}<br />";
-                watch = fpsinfo + pinfo;
+        var scannedSectors = [];
+
+        var update = function ()
+        {
+            var win = global.watchWindow;
             
-            // Display which sectors the player is located in
-            var map = global.activeMap,
-                sectorinfo = "Located in sector(s):";
-            
-            var getSectorInfo = function (sectors)
-            {
-                for (var i = 0, max = sectors.length; i < max; i++) {
-                    if (TechEngine.Math.isPointInPolygon(player, sectors[i].vertices)) {
-                        sectorinfo += " &gt; " + i;
-                        
-                        if (sectors[i].childsectors.length > 0) {
-                            getSectorInfo(sectors[i].childsectors);
+            if (typeof win != "undefined" && win != null) {
+                var elapsed = new Date().getTime() - lastFpsUpdate,
+                    fpsinfo = "<strong>" + Math.round(1000 / elapsed) + " </strong>fps<br />",
+                    player = global.player,
+                    pinfo = "Player { x: " + player.x + ", y: " + player.y + ", z: " + player.z + ", height: " + player.height + ", width: " + player.width + ", angle: " + player.angle.degrees + "}<br />",
+                    csectors = "Scanned sectors: " + TechEngine.Rendering.WatchWindow.scannedSectors.unique() + "<br />",
+                    watch = fpsinfo + pinfo;
+                
+                // Display which sectors the player is located in
+                var map = global.activeMap,
+                    sectorinfo = "Located in sector(s): ";
+                
+                var getSectorInfo = function (sectors)
+                {
+                    for (var i = 0, max = sectors.length; i < max; i++) {
+                        if (TechEngine.Math.isPointInPolygon(player, sectors[i].vertices)) {
+                            sectorinfo += i + ", ";
+                            
+                            if (sectors[i].childsectors.length > 0) {
+                                getSectorInfo(sectors[i].childsectors);
+                            }
                         }
                     }
-                }
-            };
-            getSectorInfo(map.sectors);
-            
-            win.innerHTML = watch + sectorinfo;
-            lastFpsUpdate = new Date().getTime();
+                }(map.sectors);
+
+                win.innerHTML = watch + sectorinfo + "<br />" + csectors;
+                lastFpsUpdate = new Date().getTime();
+            }
         }
-    }
+
+        return {
+            update: update,
+            scannedSectors: scannedSectors
+        };
+    }();
     
     // Namespace: TechEngine.Rendering.Map
     // Handles rendering of the map view
@@ -110,7 +120,7 @@ TechEngine.Rendering = function ()
         };
         
         // Render the top-down view of the map
-        var render = function ()
+        var update = function ()
         {
             var context = global.contextMap,
                 map = global.activeMap;
@@ -127,7 +137,7 @@ TechEngine.Rendering = function ()
         
         // Reveal public module members
         return {
-            render: render
+            update: update
         };
     }();
     
@@ -168,19 +178,24 @@ TechEngine.Rendering = function ()
         {
             var drawParams = intersection.drawParams;
                 
-            /*if (objects.settings.renderTextures()) {
+            //if (objects.settings.renderTextures()) {
                 // Draw wall slice with texture
-                context.drawImage(drawParams.texture, 
+                /*context.drawImage(drawParams.texture, 
                                   intersection.textureX, drawParams.sy1, 1, drawParams.sy2 - drawParams.sy1,
-                                  vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
-            }
-            else {*/
+                                  vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);*/
+            //
+            //else {
                 // Draw without textures
-                context.lineSquare(vscan, drawParams.dy1,  1, drawParams.dy2, "#990000");
+                //context.lineSquare(vscan, drawParams.dy1,  1, drawParams.dy2, "#990000");
             //}
             
+            context.drawImage(drawParams.texture, 
+                              drawParams.sx, drawParams.sy1, 1, drawParams.sy2 - drawParams.sy1,
+                              vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
+
             // Make walls in the distance appear darker
             var opacity = TechEngine.Rendering.Core.getDistanceOpacity(intersection.distance);
+
             if (intersection.distance > constants.startFadingAt) {
                 context.lineSquare(vscan, drawParams.dy1, 1, drawParams.dy2, context.rgba(0, 0, 0, opacity));
             }
@@ -214,13 +229,13 @@ TechEngine.Rendering = function ()
         }
         
         // Render the 3D scene
-        var render = function ()
+        var update = function ()
         {
             var map = global.activeMap;
                 
             context = global.contextScene;
             context.clear();
-            context.square(0, 0, constants.screenSize.w, constants.screenSize.h, "#fff");
+            context.square(0, 0, constants.screenSize.w, constants.screenSize.h, "#ccc");
             
             // Render sky background
             renderSky(map.background);
@@ -228,7 +243,12 @@ TechEngine.Rendering = function ()
             // Render walls and sprites
             var angle = new TechEngine.Math.Angle(global.player.angle.degrees + constants.fieldOfView / 2);
             
+            // Restart tracking of scanned sectors in the watch window.
+            TechEngine.Rendering.WatchWindow.scannedSectors = [];
+
             for (var vscan = 0, max = constants.screenSize.w; vscan < max; vscan++)  {
+            //clearInterval(TechEngine.Global.glInterval); function debugRenderer(vscan) { setTimeout(function () {
+
                 // Search for walls and sprites in given direction and draw the vertical scanline for them.
                 // All objects in visible range will be drawn in order of distance.
                 var intersections = TechEngine.Rendering.Core.findObjects(angle, vscan);
@@ -243,12 +263,16 @@ TechEngine.Rendering = function ()
                         renderWall(vscan, intersection);
                     }
                 }
+
                 angle.turn(-global.angleBetweenRays);
+                
+            //if (vscan < constants.screenSize.w) { debugRenderer(vscan + 1); } }, 10); }; debugRenderer(0);
             }
+
         };
         
         return {
-            render: render
+            update: update
         };
     }();
     
@@ -256,7 +280,7 @@ TechEngine.Rendering = function ()
         Map: Map,
         Scene: Scene,
         Core: {},
-        updateWatchWindow: updateWatchWindow
+        WatchWindow: WatchWindow
     };
 }();
 

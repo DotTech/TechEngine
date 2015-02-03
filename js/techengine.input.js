@@ -25,7 +25,7 @@ TechEngine.Input = function ()
             charE: data.keyButton(69),
             charS: data.keyButton(83),
             charD: data.keyButton(68),
-            charX: data.keyButton(88)
+            charX: data.keyButton(88),
         };
     
     /****************** / Public methods / *****************/

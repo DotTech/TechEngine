@@ -30,7 +30,7 @@ TechEngine.Data = function ()
             v1: v1,         // From vertex
             v2: v2,         // To vertex
             isPortal: isPortal,             // true if this wall is a portal to another sector
-            portalSectorId: portalSectorId, // Id of the sector this wall is a portal to
+            portalSectorId: portalSectorId, // Index of the sector this wall is a portal to
             front: front,   // Front side (visible from inside the sector)
             back: back      // Back side (visible from outside the sector)
         };
@@ -76,7 +76,7 @@ TechEngine.Data = function ()
         };
     };
     
-    // Keyboard key structur
+    // Keyboard key structure
     var keyButton = function (code) 
     {
         return {
@@ -91,8 +91,9 @@ TechEngine.Data = function ()
         return {
             dy1: 0,         // Destination start Y coord
             dy2: 0,         // Destination end Y coord
-            sy1: 0,         // Source image start Y coord
-            sy2: 0,         // Source image end Y coord
+            sy1: 0,         // Source (texture) image start Y coord
+            sy2: 0,         // Source (texture) image end Y coord,
+            sx: 0,          // Source (texture) image X coord,
             texture: null   // Image object containing the texture or sprite to draw
         };
     };
@@ -106,7 +107,6 @@ TechEngine.Data = function ()
             distance: 0,        // Distance from source (player) to the intersection
             resourceId: 0,      // index of texture or sprite image in Objects namespace
             levelObjectId: 0,   // index of texture or sprite in Objects.Level namespace
-            textureX: 0,        // X coordinate of the texture scanline to draw
             isSprite: false,    // true if intersection is for a sprite, otherwise its for a wall
             drawParams: null    // VSliceDrawParams object for this intersection
         };
@@ -117,6 +117,15 @@ TechEngine.Data = function ()
      * Loading of game resources
      */
     
+    // Load the textures.
+    var loadTextures = function ()
+    {
+        TechEngine.log("Called: TechEngine.Data.loadTextures()");
+
+        textures[0] = new Image();
+        textures[0].src = "img/bricks-brown.png";
+    };
+
     // Load map with index id as active map
     var loadMap = function (id)
     {
@@ -133,8 +142,7 @@ TechEngine.Data = function ()
         global.player.angle.setValue(map.playerStart.angle);
     };
     
-    
-    
+	
     // Reveal public members
     return {
         // Structures
@@ -153,6 +161,7 @@ TechEngine.Data = function ()
         sprites: sprites,
         
         // Methods
+        loadTextures: loadTextures,
         loadMap: loadMap
     };
 }();

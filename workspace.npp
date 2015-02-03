@@ -1,0 +1,24 @@
+<NotepadPlus>
+    <Project name="TechEngine">
+        <Folder name="css">
+            <File name="css\main.css" />
+        </Folder>
+        <Folder name="img">
+            <File name="img\sky.jpg" />
+        </Folder>
+        <Folder name="js">
+            <File name="js\techengine.canvas.js" />
+            <File name="js\techengine.data.js" />
+            <File name="js\techengine.data.map1.js" />
+            <File name="js\techengine.global.js" />
+            <File name="js\techengine.input.js" />
+            <File name="js\techengine.js" />
+            <File name="js\techengine.main.js" />
+            <File name="js\techengine.math.js" />
+            <File name="js\techengine.player.js" />
+            <File name="js\techengine.rendering.core.js" />
+            <File name="js\techengine.rendering.js" />
+        </Folder>
+        <File name="default.html" />
+    </Project>
+</NotepadPlus>

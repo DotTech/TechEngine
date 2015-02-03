@@ -1,5 +1,22 @@
 TechEngine.log("Loading 'techengine.main.js'...");
 
+Array.prototype.contains = function(v) {
+    for(var i = 0; i < this.length; i++) {
+        if(this[i] === v) return true;
+    }
+    return false;
+};
+
+Array.prototype.unique = function() {
+    var arr = [];
+    for(var i = 0; i < this.length; i++) {
+        if(!arr.contains(this[i])) {
+            arr.push(this[i]);
+        }
+    }
+    return arr; 
+}
+
 /*
 //  Namespace:      TechEngine.Main
 //  Description:    Main entry point of the application
@@ -12,6 +29,9 @@ TechEngine.Main = function ()
         // Init input handling
         TechEngine.Input.init();
         
+        // Load textures
+        TechEngine.Data.loadTextures();
+
         // Load active map
         TechEngine.Data.loadMap(0);
         
@@ -23,9 +43,9 @@ TechEngine.Main = function ()
     var gameLoop = function ()
     {
         TechEngine.Input.update();
-        TechEngine.Rendering.Map.render();
-        TechEngine.Rendering.Scene.render();
-        TechEngine.Rendering.updateWatchWindow();
+        TechEngine.Rendering.Map.update();
+        TechEngine.Rendering.Scene.update();
+        TechEngine.Rendering.WatchWindow.update();
     };
     
     // Initialize and start the gameloop
