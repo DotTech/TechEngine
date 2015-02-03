@@ -2,13 +2,13 @@ TechEngine.log("Loading 'techengine.data.js'...", true);
 
 /*
 //  Namespace:      TechEngine.Data
-//  Description:    Data structure definitions and resource buffers
+//  Description:    Data structure definitions
 */
 TechEngine.Data = function ()
 {
-    var maps = new Array(),
-        textures = new Array(),
-        sprites = new Array();
+    var maps = [],
+        textures = [],
+        sprites = [];
     
     /**
      * Data structure definitions
@@ -40,9 +40,9 @@ TechEngine.Data = function ()
     var wallside = function (topTexture, middleTexture, bottomTexture) 
     {
         return {
-            topTexture: topTexture,         // index of texture to use for wall top
-            middleTexture: middleTexture,   // index of texture to use for wall middle
-            bottomTexture: bottomTexture,   // index of texture to use for wall bottom
+            topTexture: topTexture,         // Reference to the texture object used for wall top
+            middleTexture: middleTexture,   // Reference to the texture object used for wall middle
+            bottomTexture: bottomTexture,   // Reference to the texture object used for wall bottom
         };
     };
     
@@ -71,8 +71,9 @@ TechEngine.Data = function ()
                 z: 0, 
                 angle: 0 
             },
-            background: new Image(),
-            sectors: []
+            background: new Image(), // Sky background
+            textures: [], // Array of Image objects
+            sectors: []   // Array of sector objects
         };
     };
     
@@ -112,12 +113,22 @@ TechEngine.Data = function ()
         };
     };
     
+    // Returns an Image object containing a texture
+    var texture = function (src)
+    {
+        var img = new Image();
+        img.src = src;
+
+        return img;
+    };
+
     
     /**
      * Loading of game resources
      */
     
     // Load the textures.
+    // TODO: Refactor
     var loadTextures = function ()
     {
         TechEngine.log("Called: TechEngine.Data.loadTextures()");
@@ -131,8 +142,8 @@ TechEngine.Data = function ()
     {
         TechEngine.log("Called: TechEngine.Data.loadMap()");
         
-        var map = TechEngine.Data.maps[0],
-            global = TechEngine.Global;
+        var global = TechEngine.Global,
+            map = global.maps[id];
         
         global.activeMap = map;
         
@@ -151,6 +162,7 @@ TechEngine.Data = function ()
         wallside: wallside,
         sector: sector,
         map: map,
+        texture: texture,
         keyButton: keyButton,
         VSliceDrawParams: VSliceDrawParams,
         intersection: intersection,

@@ -6,16 +6,24 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
 (function ()
 {
     var data = TechEngine.Data,
-        map = data.map(),
-        wallSide = data.wallside("img/bricks-brown.png", "img/bricks-brown.png", "img/bricks-brown.png");
-    
+        global = TechEngine.Global,
+        map = data.map();
+        
     map.playerStart.x = 290;
     map.playerStart.y = 255;
     map.playerStart.z = 0;
     map.playerStart.angle = 340;
-    
+
+    // Textures and background
+    map.textures = [
+        data.texture("img/bricks-brown.png") // 0
+    ];
+
     map.background.src = "img/sky.jpg";
-    
+
+    wallSide = data.wallside(map.textures[0], map.textures[0], map.textures[0]);
+
+    // Sectors, vertices and walls.
     map.sectors = [
         data.sector(0, 158, 0, 0),
         data.sector(32, 226, 0, 0),
@@ -132,7 +140,7 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
         data.wall(5, 0, false, 0, wallSide, wallSide)
     ];
 
-    data.maps[0] = map;
+    global.maps.push(map);
     
 }());
     

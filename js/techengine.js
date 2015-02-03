@@ -1,13 +1,13 @@
 /*
     TechEngine
-    A 3D game engine in Javascript
+    Doom-like 3D game engine in Javascript
     
     Author:     Ruud van Falier (ruud@dottech.nl)
-    Version:    1.0.0
+    Version:    0.0.1
     Released:   -
     
     Demo:       http://www.dottech.nl/techengine/
-    Git:        https://github.com/Stribe/TechEngine
+    Git:        https://github.com/DotTech/TechEngine
     
     ...description here
     
@@ -17,10 +17,19 @@
 var TechEngine = 
 {
     // Include files in loading order
-    includes: [ "js/techengine.math.js", "js/techengine.global.js", "js/techengine.data.js", 
-                "js/techengine.data.map1.js", "js/techengine.canvas.js", "js/techengine.rendering.js",
-                "js/techengine.rendering.core.js",  "js/techengine.player.js", "js/techengine.input.js", 
-                "js/techengine.main.js" ],
+    includes: [ 
+        "js/techengine.array.js", 
+        "js/techengine.math.js", 
+        "js/techengine.global.js", 
+        "js/techengine.data.js", 
+        "js/techengine.data.map1.js", 
+        "js/techengine.canvas.js", 
+        "js/techengine.rendering.js",
+        "js/techengine.rendering.core.js",  
+        "js/techengine.player.js", 
+        "js/techengine.input.js", 
+        "js/techengine.main.js" 
+    ],
     
     // Namespaces used in this application
     Global:     {},
