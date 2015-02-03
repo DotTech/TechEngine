@@ -109,10 +109,9 @@ TechEngine.Data = function ()
             x: 0,               // X coordinate of this intersection
             y: 0,               // Y coordinate of this intersection
             distance: 0,        // Distance from source (player) to the intersection
-            resourceId: 0,      // index of texture or sprite image in Objects namespace
-            levelObjectId: 0,   // index of texture or sprite in Objects.Level namespace
-            isSprite: false,    // true if intersection is for a sprite, otherwise its for a wall
-            drawParams: null    // VSliceDrawParams object for this intersection
+            drawParams: null,   // VSliceDrawParams object for this intersection
+            mapObject: null,    // The map object (wall, sprite) that was found at this intersection,
+            mapObjectType: null // The map object type ["wall", "sprite"]
         };
     };
     
@@ -130,16 +129,6 @@ TechEngine.Data = function ()
      * Loading of game resources
      */
     
-    // Load the textures.
-    // TODO: Refactor
-    var loadTextures = function ()
-    {
-        TechEngine.log("Called: TechEngine.Data.loadTextures()");
-
-        textures[0] = new Image();
-        textures[0].src = "img/bricks-brown.png";
-    };
-
     // Load map with index id as active map
     var loadMap = function (id)
     {
@@ -176,7 +165,6 @@ TechEngine.Data = function ()
         sprites: sprites,
         
         // Methods
-        loadTextures: loadTextures,
         loadMap: loadMap
     };
 }();

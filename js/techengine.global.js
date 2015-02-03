@@ -18,7 +18,11 @@ TechEngine.Global = function ()
         glIntervalTimeout: 20,          // Gameloop interval timeout
         canvasIdScene: "scene",         // ID of canvas element to render the scene on
         canvasIdMap: "map",             // ID of canvas element to render the map on
-        mapScale: 0.2
+        mapScale: 0.2,
+        mapObjectTypes: {
+            wall: "wall",
+            sprite: "sprite"
+        }
     };
     
     // Global variables

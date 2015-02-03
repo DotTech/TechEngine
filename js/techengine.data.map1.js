@@ -20,22 +20,24 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
         data.texture("img/bricks-gray.png"),     // 1
         data.texture("img/rockwall.png"),        // 2
         data.texture("img/tiles-bluegreen.png"), // 3
-        data.texture("img/tiles-street.png")     // 4
+        data.texture("img/tiles-street.png"),    // 4
+        data.texture("img/bricks-brown-painting.png") // 5
     ];
 
     map.background.src = "img/sky.jpg";
 
     wallSideBricksBrown = data.wallside(map.textures[0], map.textures[0], map.textures[0]);
+    wallSideBricksBrownPainting = data.wallside(map.textures[0], map.textures[5], map.textures[0]);
     wallSideBricksGray = data.wallside(map.textures[1], map.textures[1], map.textures[1]);
     wallSideRockWall = data.wallside(map.textures[2], map.textures[2], map.textures[2]);
 
     // Sectors, vertices and walls.
     map.sectors = [
-        data.sector(0, 80, 3, 2),
-        data.sector(32, 226, 4, 2),
+        data.sector(0, 128, 3, 2),
+        data.sector(24, 226, 4, 2),
         data.sector(0, 178, 3, 2),
-        data.sector(32, 150, 2, 2),
-        data.sector(32, 190, 4, 2)
+        data.sector(36, 150, 2, 2),
+        data.sector(56, 190, 4, 2)
     ];
     
     map.sectors[0].vertices = [
@@ -50,13 +52,13 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     ];
     
     map.sectors[0].walls = [
-        data.wall(0, 1, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(0, 1, false, 0, wallSideBricksBrownPainting, wallSideBricksBrownPainting),
         data.wall(1, 2, false, 0, wallSideBricksBrown, wallSideBricksBrown),
-        data.wall(2, 3, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(2, 3, false, 0, wallSideBricksBrownPainting, wallSideBricksBrownPainting),
         data.wall(3, 4, true, 1, wallSideBricksBrown, wallSideBricksBrown),
-        data.wall(4, 5, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(4, 5, false, 0, wallSideBricksBrownPainting, wallSideBricksBrownPainting),
         data.wall(5, 6, false, 0, wallSideBricksBrown, wallSideBricksBrown),
-        data.wall(6, 7, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(6, 7, false, 0, wallSideBricksBrownPainting, wallSideBricksBrownPainting),
         data.wall(7, 0, false, 0, wallSideBricksBrown, wallSideBricksBrown)
     ];
     
@@ -139,7 +141,7 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
     
     map.sectors[4].walls = [
         data.wall(0, 1, true, 3, wallSideBricksBrown, wallSideBricksBrown),
-        data.wall(1, 2, false, 0, wallSideBricksBrown, wallSideBricksBrown),
+        data.wall(1, 2, false, 0, wallSideBricksBrownPainting, wallSideBricksBrownPainting),
         data.wall(2, 3, false, 0, wallSideBricksBrown, wallSideBricksBrown),
         data.wall(3, 4, false, 0, wallSideBricksBrown, wallSideBricksBrown),
         data.wall(4, 5, false, 0, wallSideBricksBrown, wallSideBricksBrown),

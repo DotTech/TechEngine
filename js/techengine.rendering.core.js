@@ -6,21 +6,6 @@ TechEngine.Rendering.Core = function ()
         constants = global.constants,
         fishbowlFixValue = 0;
     
-    // Returns the sector the player is currently located in
-    var getCurrentSectorId = function ()
-    {
-        var map = TechEngine.Global.activeMap,
-            player = TechEngine.Global.player;
-        
-        for (var i = 0, max = map.sectors.length; i < max; i++) {
-            if (TechEngine.Math.isPointInPolygon(player, map.sectors[i].vertices)) {
-                return i;
-            }
-        }
-        
-        return 0;
-    };
-    
     // Calculate value needed to manipulate distance to counter the "fishbowl effect"
     var setFishbowlFixValue = function(vscan)
     {
@@ -45,24 +30,15 @@ TechEngine.Rendering.Core = function ()
     // - ty2:       End point of the slice on the texture image
     // - tx:        X-coord of the slice on the texture image
     // - texture:   Image object containing the texture to draw
+    // TODO: Update parameter description
     var setVScanDrawParams = function(intersection, sector)
     {
         var scanlineOffsY = 0,                              // Additional Y-offset for the scanline (used in sprites)
             distance = intersection.distance * fishbowlFixValue, // Distance to the intersection
             objectHeight = sector.ceilingHeight - sector.floorHeight,
-            objectZ = 0, //sector.floorHeight,
+            objectZ = sector.floorHeight,
             height = Math.floor(objectHeight / distance * global.distanceToViewport);    // Height of the object on screen
 
-        /*
-        objHeight = intersection.isSprite           // Original height of the object at current intersection
-            ? texture.height 
-            : sector.ceilingHeight - sector.floorHeight,
-
-        objectZ = intersection.isSprite           // Z-position of the object at current intersection
-            ? levelObject.z
-            : 0, //getWallZ(intersection),
-        */
-        
         // horizonOffset is used for aligning walls and objects correctly on the horizon.
         // Without this value, everything would always be vertically centered.
         var eyeHeight = global.player.height * 0.75,
@@ -75,8 +51,6 @@ TechEngine.Rendering.Core = function ()
         // Determine where to start and end the scanline on the screen
         intersection.drawParams.sy2 = parseInt((constants.screenSize.h / 2 - horizonOffset) + height / 2); // Scanline end Y, potentially off screen
         intersection.drawParams.sy1 = intersection.drawParams.sy2 - height; // Scanline start Y, potentially off screen
-
-        var test = intersection.drawParams.sy2 - intersection.drawParams.sy1;
 
         // Set destination (screen) coordinates for scanline
         intersection.drawParams.dy1 = intersection.drawParams.sy1;
@@ -100,13 +74,14 @@ TechEngine.Rendering.Core = function ()
     };
 
     // Sets the wall texture drawing parameters on the intersection's VScanDrawParams
-    var setWallTexture = function(intersection, wall)
+    var setWallTexture = function(intersection)
     {
         if (intersection.drawParams == null) {
             return false;
         }
 
         var sheight = intersection.drawParams.sy2 - intersection.drawParams.sy1,   // Scanline height (may be to large for screen)
+            wall = intersection.mapObject,
             texture = wall.front.middleTexture, // TODO: Implement top & bottom textures
             scale = sheight / texture.height,   // Height ratio of the scanline compared to its original size on the object
             srcStartY = 0,                      // Start Y coord of source image data
@@ -136,7 +111,9 @@ TechEngine.Rendering.Core = function ()
         }
 
         // Determine the texture image X coordinate to use when copying the scanline.
+        // TODO: Texture are now stretched instead of a repeated pattern?
         var distanceToIntersection = TechEngine.Math.getHypotenuseLength(intersection.v1.x - intersection.x, intersection.v1.y - intersection.y);
+
         intersection.drawParams.tx = parseInt(distanceToIntersection % texture.width);
 
         return true;
@@ -187,26 +164,32 @@ TechEngine.Rendering.Core = function ()
             intersection = math.getIntersection(v1, v2, angle);
         
         if (intersection) {
+            // Remember that the wall is associated with this intersection
+            intersection.mapObject = wall;
+            intersection.mapObjectType = constants.mapObjectTypes.wall;
+
             // TODO: We're now skipping draw parameters if wall is portal, \
             // must be implemented when top/bottom textures are implemented
             if (wall.isPortal) {
-                return intersection;
+                //return intersection;
             }
 
             // Calculate the drawing parameters for the vertical scanline for this wall
             setVScanDrawParams(intersection, sector);
 
             // Calculate the texture drawing parameters
-            setWallTexture(intersection, wall);
+            setWallTexture(intersection);
+
+            return intersection;
         }
         
-        return intersection;
+        return false;
     };
     
     // Find intersection for all the walls and sprites that are in the specified sector 
     // and inside the player's field of view.
-    // Returns array with intersection objects, sorted descending by distance (closest first)
-    var findObjects = function(angle, vscan, sectorId, foundSectors)
+    // Returns array with intersection objects, sorted descending by distance (furthest first)
+    var findObjects = function(angle, vscan, recurse, sectorId, foundSectors)
     {
         var map = global.activeMap,
             intersections = [];        
@@ -215,7 +198,7 @@ TechEngine.Rendering.Core = function ()
 
         // Determine in which sector the player is located
         if (typeof sectorId == "undefined" || sectorId == null) {
-            sectorId = getCurrentSectorId();
+            sectorId = global.player.getCurrentSectorId();
             TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
         }
         
@@ -226,8 +209,11 @@ TechEngine.Rendering.Core = function ()
                 intersection = findWall(sector, angle, wall);
                 
             if (intersection) {
-            
-                if (wall.isPortal) {
+
+                TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
+                intersections.push(intersection);
+
+                if (wall.isPortal && recurse) {
                     // Wall is a portal to another sector
                     var connectedSectorid = wall.portalSectorId;
                     
@@ -243,13 +229,10 @@ TechEngine.Rendering.Core = function ()
                     var sectorFoundBefore = foundSectors.contains(connectedSectorid);
                     
                     if (!sectorFoundBefore) {
-                        cintersections = findObjects(angle, vscan, connectedSectorid, foundSectors)
+                        cintersections = findObjects(angle, vscan, true, connectedSectorid, foundSectors)
                         intersections = intersections.concat(cintersections);
                     }
                 }
-
-                TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
-                intersections.push(intersection);
             }
         }
         

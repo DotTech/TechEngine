@@ -12,9 +12,6 @@ TechEngine.Main = function ()
         // Init input handling
         TechEngine.Input.init();
         
-        // Load textures
-        TechEngine.Data.loadTextures();
-
         // Load active map
         TechEngine.Data.loadMap(0);
         

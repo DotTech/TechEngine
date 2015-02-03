@@ -12,6 +12,9 @@
     ...description here
     
     See readme.txt for revision log!
+
+    TODO:
+    - Not in sector when player is exactly on the border of 2 sectors
 */
 
 var TechEngine = 

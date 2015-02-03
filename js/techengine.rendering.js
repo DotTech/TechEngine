@@ -173,7 +173,7 @@ TechEngine.Rendering = function ()
             }
         };
         
-        // Draw the vertical slice for a wall
+        // Draw the vertical scanline for a wall
         var renderWall = function (vscan, intersection)
         {
             var drawParams = intersection.drawParams;
@@ -182,17 +182,7 @@ TechEngine.Rendering = function ()
                 return;
             }
 
-            //if (objects.settings.renderTextures()) {
-                // Draw wall slice with texture
-                /*context.drawImage(drawParams.texture, 
-                                  intersection.textureX, drawParams.sy1, 1, drawParams.sy2 - drawParams.sy1,
-                                  vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);*/
-            //
-            //else {
-                // Draw without textures
-                //context.lineSquare(vscan, drawParams.dy1,  1, drawParams.dy2, "#990000");
-            //}
-            
+            // Draw vertical wall scanline with texture
             context.drawImage(drawParams.texture, 
                               drawParams.tx, drawParams.ty1, 1, drawParams.ty2 - drawParams.ty1,
                               vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
@@ -205,7 +195,7 @@ TechEngine.Rendering = function ()
             }
         }
         
-        // Draw the vertical slice for a sprite
+        // Draw the vertical scanline for a sprite
         var renderSprite = function (vscan, intersection)
         {
             /*if (objects.settings.renderSprites()) {
@@ -232,6 +222,36 @@ TechEngine.Rendering = function ()
             }*/
         }
         
+        // Draw the vertical scanline for the floor
+        var renderFloor = function(vscan, startY, intersection)
+        {
+            /*var step = 1;
+            
+            // Formula from: http://lodev.org/cgtutor/raycasting2.html
+            if (objects.settings.renderFloor() && vscan % step == 0) {
+                
+                var floorTexture = objects.textures[Raycaster.Objects.Level.floorTextureId];
+                
+                for (var y = startY; y < constants.screenHeight; y += step) {
+                    var curdist = constants.screenHeight / (2 * y - constants.screenHeight);
+                
+                    var weight = curdist / intersection.distance,
+                        floorX = weight * intersection.x + (1 - weight) * objects.player.x,
+                        floorY = weight * intersection.y + (1 - weight) * objects.player.y,
+                        textureX = parseInt(floorX * floorTexture.width) % floorTexture.width,
+                        textureY = parseInt(floorY * floorTexture.height) % floorTexture.height;
+                        
+                    context.drawImage(floorTexture, 
+                                      textureX, textureY, 1, 1,
+                                      vscan, y, step, step);
+                    
+                    //if (objects.settings.renderLighting() && curdist > 100) {
+                    //    drawing.lineSquare(vscan, y, vscan + 1, y + 1, drawing.colorRgba(0, 0, 0, calcDistanceOpacity(curdist)))
+                    //}
+                }
+            }*/
+        };
+
         // Render the 3D scene
         var update = function ()
         {
@@ -255,7 +275,7 @@ TechEngine.Rendering = function ()
 
                 // Search for walls and sprites in given direction and draw the vertical scanline for them.
                 // All objects in visible range will be drawn in order of distance.
-                var intersections = TechEngine.Rendering.Core.findObjects(angle, vscan);
+                var intersections = TechEngine.Rendering.Core.findObjects(angle, vscan, true);
                 
                 // Draw found objects for each found intersection back-to-front 
                 for (var i = 0, maxi = intersections.length; i < maxi; i++) {
