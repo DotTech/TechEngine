@@ -182,6 +182,12 @@ TechEngine.Rendering = function ()
                 return;
             }
 
+            if (intersection.mapObject.isPortal) {
+                // Don't draw walls that are portals
+                // TODO: Implement drawing of top/bottom texture
+                return;
+            }
+
             // Draw vertical wall scanline with texture
             context.drawImage(drawParams.texture, 
                               drawParams.tx, drawParams.ty1, 1, drawParams.ty2 - drawParams.ty1,
@@ -223,32 +229,53 @@ TechEngine.Rendering = function ()
         }
         
         // Draw the vertical scanline for the floor
-        var renderFloor = function(vscan, startY, intersection)
+        var renderFloor = function(vscan, intersection)
         {
-            /*var step = 1;
-            
+            return;
+
+            var startY = intersection.drawParams.dy2,
+                endY = constants.screenSize.h, // TODO: Find bottom of section
+                textureId = global.activeMap.sectors[intersection.sectorId].floorTexture;
+
+            var color = context.rgba(0, 0, 0, 1);
+
+            if (textureId == 2) {
+                color = context.rgba(100, 0, 0, 1);
+            }
+            else if (textureId == 3) {
+                color = context.rgba(0, 100, 0, 1);
+            }
+            else if (textureId == 4) {
+                color = context.rgba(0, 0, 100, 1);
+            }
+
+            context.lineSquare(vscan, startY, 1, endY, color);
+
+            /* Disabled because I can't get it to perform with textures...
             // Formula from: http://lodev.org/cgtutor/raycasting2.html
-            if (objects.settings.renderFloor() && vscan % step == 0) {
+
+            var textureId = global.activeMap.sectors[intersection.sectorId].floorTexture,
+                texture = global.activeMap.textures[textureId],
+                startY = intersection.drawParams.dy2,
+                endY = constants.screenSize.h; // TODO: Find bottom of section
+            
+            for (var y = startY; y < endY; y += 1) {
+                var distance = constants.screenSize.h / (2 * y - constants.screenSize.h);
                 
-                var floorTexture = objects.textures[Raycaster.Objects.Level.floorTextureId];
-                
-                for (var y = startY; y < constants.screenHeight; y += step) {
-                    var curdist = constants.screenHeight / (2 * y - constants.screenHeight);
-                
-                    var weight = curdist / intersection.distance,
-                        floorX = weight * intersection.x + (1 - weight) * objects.player.x,
-                        floorY = weight * intersection.y + (1 - weight) * objects.player.y,
-                        textureX = parseInt(floorX * floorTexture.width) % floorTexture.width,
-                        textureY = parseInt(floorY * floorTexture.height) % floorTexture.height;
-                        
-                    context.drawImage(floorTexture, 
-                                      textureX, textureY, 1, 1,
-                                      vscan, y, step, step);
+                var weight = distance / intersection.distance,
+                    floorX = weight * intersection.x + (1 - weight) * global.player.x,
+                    floorY = weight * intersection.y + (1 - weight) * global.player.y,
+                    textureX = parseInt(floorX * texture.width) % texture.width,
+                    textureY = parseInt(floorY * texture.height) % texture.height;
                     
-                    //if (objects.settings.renderLighting() && curdist > 100) {
-                    //    drawing.lineSquare(vscan, y, vscan + 1, y + 1, drawing.colorRgba(0, 0, 0, calcDistanceOpacity(curdist)))
-                    //}
-                }
+                context.drawImage(texture, 
+                                  textureX, textureY, 1, 1,
+                                  vscan, y, 1, 1);
+                
+                //if (distance > constants.startFadingAt) {
+                //    var opacity = TechEngine.Rendering.Core.getDistanceOpacity(intersection.distance)
+                //    context.lineSquare(vscan, y, vscan + 1, y + 1, context.rgba(0, 0, 0, opacity))
+                //}
             }*/
         };
 
@@ -274,20 +301,28 @@ TechEngine.Rendering = function ()
             //clearInterval(TechEngine.Global.glInterval); function debugRenderer(vscan) { setTimeout(function () {
 
                 // Search for walls and sprites in given direction and draw the vertical scanline for them.
-                // All objects in visible range will be drawn in order of distance.
+                // All objects in visible range will be drawn in order of distance (back to front).
                 var intersections = TechEngine.Rendering.Core.findObjects(angle, vscan, true);
                 
-                // Draw found objects for each found intersection back-to-front 
+                // Draw objects for each found intersection 
                 for (var i = 0, maxi = intersections.length; i < maxi; i++) {
                     var intersection = intersections[i];
-                    if (intersection.isSprite) {
-                        renderSprite(vscan, intersection);
-                    }
-                    else {
+
+                    if (intersection.mapObjectType == constants.mapObjectTypes.wall) {
+                        // Render the wall object scanline
                         renderWall(vscan, intersection);
+
+                        // Render the floor scanline
+                        renderFloor(vscan, intersection);
+                    }
+
+                    if (intersection.mapObjectType == constants.mapObjectTypes.sprite) {
+                        // Render the sprite scanline
+                        renderSprite(vscan, intersection);
                     }
                 }
 
+                // Rotate angle for next vscan
                 angle.turn(-global.angleBetweenRays);
                 
             //if (vscan < constants.screenSize.w) { debugRenderer(vscan + 1); } }, 10); }; debugRenderer(0);

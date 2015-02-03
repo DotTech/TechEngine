@@ -211,6 +211,11 @@ TechEngine.Rendering.Core = function ()
             if (intersection) {
 
                 TechEngine.Rendering.WatchWindow.scannedSectors.push(sectorId);
+
+                // Remember the sector index for this intersection
+                intersection.sectorId = sectorId;
+
+                // Add intersection to return value
                 intersections.push(intersection);
 
                 if (wall.isPortal && recurse) {

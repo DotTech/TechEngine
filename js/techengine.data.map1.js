@@ -9,10 +9,17 @@ TechEngine.log("Loading 'techengine.data.map1.js'...", true);
         global = TechEngine.Global,
         map = data.map();
         
+    /*
     map.playerStart.x = 290;
     map.playerStart.y = 255;
     map.playerStart.z = 0;
     map.playerStart.angle = 340;
+    */
+
+    map.playerStart.x = 760;
+    map.playerStart.y = 440;
+    map.playerStart.z = 0;
+    map.playerStart.angle = 181;
 
     // Textures and background
     map.textures = [

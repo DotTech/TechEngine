@@ -111,7 +111,8 @@ TechEngine.Data = function ()
             distance: 0,        // Distance from source (player) to the intersection
             drawParams: null,   // VSliceDrawParams object for this intersection
             mapObject: null,    // The map object (wall, sprite) that was found at this intersection,
-            mapObjectType: null // The map object type ["wall", "sprite"]
+            mapObjectType: null,// The map object type ["wall", "sprite"]
+            sectorId: 0
         };
     };
     
