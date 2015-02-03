@@ -54,10 +54,10 @@ TechEngine.Data = function ()
             ceilingHeight: ceilingHeight,
             floorTexture: floorTexture,
             ceilingTexture: ceilingTexture,
-            vertices: new Array(),
-            walls: new Array(),
-            objects: new Array(),
-            childsectors: new Array()
+            vertices: [],
+            walls: [],
+            objects: [],
+            childsectors: []
         };
     };
     
@@ -72,7 +72,7 @@ TechEngine.Data = function ()
                 angle: 0 
             },
             background: new Image(),
-            sectors: new Array()
+            sectors: []
         };
     };
     
