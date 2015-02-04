@@ -231,29 +231,8 @@ TechEngine.Rendering = function ()
         // Draw the vertical scanline for the floor
         var renderFloor = function(vscan, intersection)
         {
-            return;
-
-            var startY = intersection.drawParams.dy2,
-                endY = constants.screenSize.h, // TODO: Find bottom of section
-                textureId = global.activeMap.sectors[intersection.sectorId].floorTexture;
-
-            var color = context.rgba(0, 0, 0, 1);
-
-            if (textureId == 2) {
-                color = context.rgba(100, 0, 0, 1);
-            }
-            else if (textureId == 3) {
-                color = context.rgba(0, 100, 0, 1);
-            }
-            else if (textureId == 4) {
-                color = context.rgba(0, 0, 100, 1);
-            }
-
-            context.lineSquare(vscan, startY, 1, endY, color);
-
-            /* Disabled because I can't get it to perform with textures...
             // Formula from: http://lodev.org/cgtutor/raycasting2.html
-
+            // Performance is horrible because of per-pixel drawing
             var textureId = global.activeMap.sectors[intersection.sectorId].floorTexture,
                 texture = global.activeMap.textures[textureId],
                 startY = intersection.drawParams.dy2,
@@ -276,11 +255,25 @@ TechEngine.Rendering = function ()
                 //    var opacity = TechEngine.Rendering.Core.getDistanceOpacity(intersection.distance)
                 //    context.lineSquare(vscan, y, vscan + 1, y + 1, context.rgba(0, 0, 0, opacity))
                 //}
-            }*/
+            }
         };
 
+        // Draws a gradient that we use as floor
+        var renderFloorGradient = function()
+        {
+            var gradient = context.createLinearGradient(0, constants.screenSize.h / 2, 0, constants.screenSize.h);
+        
+            gradient.addColorStop(0, context.rgb(20, 20, 20));
+            gradient.addColorStop(0.25, context.rgb(40, 40, 40));
+            gradient.addColorStop(0.6, context.rgb(100, 100, 100));
+            gradient.addColorStop(1, context.rgb(130, 130, 130));
+            
+            context.fillStyle = gradient;
+            context.fillRect(0, constants.screenSize.h / 2, constants.screenSize.w, constants.screenSize.h / 2);
+        }
+
         // Render the 3D scene
-        var update = function ()
+        var update = function()
         {
             var map = global.activeMap;
                 
@@ -290,6 +283,9 @@ TechEngine.Rendering = function ()
             
             // Render sky background
             renderSky(map.background);
+
+            // Render floor gradient
+            renderFloorGradient();
             
             // Render walls and sprites
             var angle = new TechEngine.Math.Angle(global.player.angle.degrees + constants.fieldOfView / 2);
@@ -312,8 +308,8 @@ TechEngine.Rendering = function ()
                         // Render the wall object scanline
                         renderWall(vscan, intersection);
 
-                        // Render the floor scanline
-                        renderFloor(vscan, intersection);
+                        // Render the floor scanline (disabled due to performance)
+                        // renderFloor(vscan, intersection);
                     }
 
                     if (intersection.mapObjectType == constants.mapObjectTypes.sprite) {
