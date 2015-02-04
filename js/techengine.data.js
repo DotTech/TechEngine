@@ -17,9 +17,15 @@ TechEngine.Data = function ()
     // Vertex structure
     var vertex = function (x, y) 
     {
+        var equals = function(vertex) 
+        {
+            return Math.abs(vertex.x - x) == 0 && Math.abs(vertex.x - x);
+        }
+
         return { 
             x: x, 
-            y: y  
+            y: y,
+            equals: equals
         };
     };
     
@@ -29,10 +35,11 @@ TechEngine.Data = function ()
         return { 
             v1: v1,         // From vertex
             v2: v2,         // To vertex
-            isPortal: isPortal,             // true if this wall is a portal to another sector
-            portalSectorId: portalSectorId, // Index of the sector this wall is a portal to
+            sectorId: null, // Sector index for this wall
             front: front,   // Front side (visible from inside the sector)
-            back: back      // Back side (visible from outside the sector)
+            back: back,     // Back side (visible from outside the sector)
+            isPortal: isPortal,             // true if this wall is a portal to another sector
+            portalSectorId: portalSectorId  // Index of the sector this wall is a portal to
         };
     };
     
@@ -42,7 +49,7 @@ TechEngine.Data = function ()
         return {
             topTexture: topTexture,         // Reference to the texture object used for wall top
             middleTexture: middleTexture,   // Reference to the texture object used for wall middle
-            bottomTexture: bottomTexture,   // Reference to the texture object used for wall bottom
+            bottomTexture: bottomTexture    // Reference to the texture object used for wall bottom
         };
     };
     
@@ -112,7 +119,8 @@ TechEngine.Data = function ()
             drawParams: null,   // VSliceDrawParams object for this intersection
             mapObject: null,    // The map object (wall, sprite) that was found at this intersection,
             mapObjectType: null,// The map object type ["wall", "sprite"]
-            sectorId: 0
+            sectorId: 0,        // Sector ID this intersection exists in
+            connectedPortalIntersection: null // Intersection of the connected portal wall
         };
     };
     

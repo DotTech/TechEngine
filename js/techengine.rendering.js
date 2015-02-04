@@ -183,9 +183,21 @@ TechEngine.Rendering = function ()
             }
 
             if (intersection.mapObject.isPortal) {
-                // Don't draw walls that are portals
-                // TODO: Implement drawing of top/bottom texture
-                return;
+                if (intersection.connectedPortalIntersection && intersection.sectorId == global.player.getCurrentSectorId()) {
+                    // Draw the top/bottom part of the wall of there is a difference in height with the adjencting sector
+                    var topDelta = drawParams.dy1 - intersection.connectedPortalIntersection.drawParams.dy1,
+                        bottomDelta = drawParams.dy2 - intersection.connectedPortalIntersection.drawParams.dy2;
+
+                    if (bottomDelta > 0) {
+                        drawParams.dy1 = drawParams.dy2 - bottomDelta;
+                        
+                        // TODO: Fix texture scaling
+                    }
+                }
+                else {
+                    // Portal wall from other sector, don't draw.
+                    return;
+                }
             }
 
             // Draw vertical wall scanline with texture
@@ -229,7 +241,7 @@ TechEngine.Rendering = function ()
         }
         
         // Draw the vertical scanline for the floor
-        var renderFloor = function(vscan, intersection)
+        /*var renderFloor = function(vscan, intersection)
         {
             // Formula from: http://lodev.org/cgtutor/raycasting2.html
             // Performance is horrible because of per-pixel drawing
@@ -256,7 +268,24 @@ TechEngine.Rendering = function ()
                 //    context.lineSquare(vscan, y, vscan + 1, y + 1, context.rgba(0, 0, 0, opacity))
                 //}
             }
-        };
+        };*/
+
+        // Draw the vertical scanline for the floor
+        var renderFloor = function(vscan, intersection)
+        {
+            var startY = intersection.drawParams.dy2,
+                endY = constants.screenSize.h; // TODO: Find bottom of section
+            
+            var gradient = context.createLinearGradient(0, constants.screenSize.h / 2, 0, constants.screenSize.h);
+        
+            gradient.addColorStop(0, context.rgb(20, 20, 20));
+            gradient.addColorStop(0.25, context.rgb(40, 40, 40));
+            gradient.addColorStop(0.6, context.rgb(100, 100, 100));
+            gradient.addColorStop(1, context.rgb(130, 130, 130));
+
+            context.fillStyle = gradient;
+            context.fillRect(vscan, startY, 1, endY - startY);
+        }
 
         // Draws a gradient that we use as floor
         var renderFloorGradient = function()
@@ -270,6 +299,11 @@ TechEngine.Rendering = function ()
             
             context.fillStyle = gradient;
             context.fillRect(0, constants.screenSize.h / 2, constants.screenSize.w, constants.screenSize.h / 2);
+
+            gradient = context.createLinearGradient(0, 0, 0, constants.screenSize.h / 2);
+        
+            context.fillStyle = context.rgb(40, 40, 40);
+            context.fillRect(0, 0, constants.screenSize.w, constants.screenSize.h / 2);
         }
 
         // Render the 3D scene
@@ -306,9 +340,9 @@ TechEngine.Rendering = function ()
 
                     if (intersection.mapObjectType == constants.mapObjectTypes.wall) {
                         // Render the wall object scanline
-                        renderWall(vscan, intersection);
+                        renderWall(vscan, intersection);                       
 
-                        // Render the floor scanline (disabled due to performance)
+                        // Render the floor scanline
                         // renderFloor(vscan, intersection);
                     }
 

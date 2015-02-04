@@ -155,7 +155,7 @@ TechEngine.Rendering.Core = function ()
     };
     
     // Find intersection on a specific wall that is in the players field of view
-    var findWall = function(sector, angle, wall)
+    var findWallIntersection = function(sector, angle, wall)
     {
         // Find intersection point on current wall
         var v1 = sector.vertices[wall.v1],
@@ -186,13 +186,46 @@ TechEngine.Rendering.Core = function ()
         return false;
     };
     
+    // Find the intersection with the portal wall in the connected sector for the given wall in the given sector
+    var findConnectedPortalIntersection = function(sector, angle, wall)
+    {
+        if (!wall.isPortal) {
+            return false;
+        }
+
+        var map = global.activeMap,
+            connectedSector = map.sectors[wall.portalSectorId];
+
+        for (var i = 0, maxi = connectedSector.walls.length; i < maxi; i++) {
+            var connectedSectorWall = connectedSector.walls[i];
+
+            if (!connectedSectorWall.isPortal) {
+                continue;
+            }
+
+            // TODO: Optimize this equation
+            if ((connectedSector.vertices[connectedSectorWall.v1].x == sector.vertices[wall.v1].x
+                    && (connectedSector.vertices[connectedSectorWall.v2].y == sector.vertices[wall.v1].y || connectedSector.vertices[connectedSectorWall.v2].y == sector.vertices[wall.v2].y))
+                ||
+                (connectedSector.vertices[connectedSectorWall.v2].x == sector.vertices[wall.v2].x 
+                    && (connectedSector.vertices[connectedSectorWall.v2].y == sector.vertices[wall.v1].y || connectedSector.vertices[connectedSectorWall.v2].y == sector.vertices[wall.v2].y))) 
+            {
+                connectedSectorWall.sectorId = wall.portalSectorId;
+                return findWallIntersection(connectedSector, angle, connectedSectorWall);
+            }
+        }
+
+        // Map is corrupt if this happens; portals always must have another portal in the connected sector
+        return false;
+    }
+
     // Find intersection for all the walls and sprites that are in the specified sector 
     // and inside the player's field of view.
     // Returns array with intersection objects, sorted descending by distance (furthest first)
     var findObjects = function(angle, vscan, recurse, sectorId, foundSectors)
     {
         var map = global.activeMap,
-            intersections = [];        
+            intersections = [];
 
         setFishbowlFixValue(vscan);
 
@@ -206,7 +239,7 @@ TechEngine.Rendering.Core = function ()
         for (var i = 0; i < map.sectors[sectorId].walls.length; i++) {
             var sector = map.sectors[sectorId],
                 wall = sector.walls[i],
-                intersection = findWall(sector, angle, wall);
+                intersection = findWallIntersection(sector, angle, wall);
                 
             if (intersection) {
 
@@ -214,6 +247,7 @@ TechEngine.Rendering.Core = function ()
 
                 // Remember the sector index for this intersection
                 intersection.sectorId = sectorId;
+                intersection.mapObject.sectorId = sectorId;
 
                 // Add intersection to return value
                 intersections.push(intersection);
@@ -221,7 +255,15 @@ TechEngine.Rendering.Core = function ()
                 if (wall.isPortal && recurse) {
                     // Wall is a portal to another sector
                     var connectedSectorid = wall.portalSectorId;
-                    
+
+                    // Find the portal wall intersection in the other sector that connects to this wall
+                    intersection.connectedPortalIntersection = findConnectedPortalIntersection(sector, angle, wall);
+
+                    if (intersection.connectedPortalIntersection) {
+                        intersection.connectedPortalIntersection.sectorId = connectedSectorid
+                        intersection.connectedPortalIntersection.mapObject.sectorId = connectedSectorid;
+                    }
+
                     // Remember the current and previous found sectors so we dont render them again
                     if (typeof foundSectors == "undefined" || foundSectors == null) {
                         foundSectors = [];
