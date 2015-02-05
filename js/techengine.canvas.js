@@ -64,16 +64,17 @@ CanvasRenderingContext2D.prototype.filledPath = function(vectorArray, color, shr
 };
 
 // Draws a line
-// Note: for some reason lineTo() and stroke() result in a semi-transparent line
-// If you want to be sure the line is of solid color, use lineSquare() instead
 CanvasRenderingContext2D.prototype.line = function(x, y, x2, y2, color)
 {
+    this.strokeStyle = color;
+    
     this.beginPath();
     this.moveTo(x, y);
     this.lineTo(x2, y2);
-    this.strokeStyle = color;
-    this.stroke();
+    this.lineWidth = 1;
     this.closePath();
+
+    this.stroke();
 };
 
 CanvasRenderingContext2D.prototype.lineSquare = function (x, y, x2, y2, color)

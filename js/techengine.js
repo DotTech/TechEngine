@@ -15,6 +15,11 @@
 
     TODO:
     - Not in sector when player is exactly on the border of 2 sectors
+    - Keep track of intersections, never calc 2x
+    - Preprocess maps (vertex, sector objects linked instead of indexes)
+    - Process top/bottom textures in setWallTexture
+    - Preprocess textures into byte arrays
+    - Draw everything in a byte array (frame buffer)
 */
 
 var TechEngine = 
@@ -27,6 +32,7 @@ var TechEngine =
         "js/techengine.data.js", 
         "js/techengine.data.map1.js", 
         "js/techengine.canvas.js", 
+        "js/techengine.framebuffer.js", 
         "js/techengine.rendering.js",
         "js/techengine.rendering.core.js",  
         "js/techengine.player.js", 

@@ -11,9 +11,12 @@ TechEngine.log("Loading 'techengine.rendering.js'...", true);
 TechEngine.Rendering = function ()
 {
     var global = TechEngine.Global,
+        frameBuffer = TechEngine.FrameBuffer,
         constants = global.constants,
+        map = global.activeMap,
+        sceneScreen = global.contextScene,
         lastFpsUpdate = new Date().getTime();
-    
+
     // Updates the values in the watch window
     var WatchWindow = function ()
     {
@@ -145,8 +148,6 @@ TechEngine.Rendering = function ()
     // Handles rendering of the 3D scene
     var Scene = function ()
     {
-        var context;
-        
         // Render the sky background
         var renderSky = function (image)
         {
@@ -183,34 +184,50 @@ TechEngine.Rendering = function ()
             }
 
             if (intersection.mapObject.isPortal) {
+                return;
+
+                /*
                 if (intersection.connectedPortalIntersection && intersection.sectorId == global.player.getCurrentSectorId()) {
                     // Draw the top/bottom part of the wall of there is a difference in height with the adjencting sector
                     var topDelta = drawParams.dy1 - intersection.connectedPortalIntersection.drawParams.dy1,
                         bottomDelta = drawParams.dy2 - intersection.connectedPortalIntersection.drawParams.dy2;
 
+                    if (bottomDelta < 0 && topDelta > 0) {
+                        return;
+                    }
+
+                    // TODO: Fix texture scaling
                     if (bottomDelta > 0) {
                         drawParams.dy1 = drawParams.dy2 - bottomDelta;
-                        
-                        // TODO: Fix texture scaling
+                    }
+
+                    if (topDelta < 0) {
+
                     }
                 }
                 else {
                     // Portal wall from other sector, don't draw.
                     return;
-                }
+                }*/
             }
 
+            frameBuffer.drawLine(vscan, drawParams.dy1, vscan, drawParams.dy2, 200, 200, 200);
+
             // Draw vertical wall scanline with texture
-            context.drawImage(drawParams.texture, 
+            /*context.drawImage(drawParams.texture, 
                               drawParams.tx, drawParams.ty1, 1, drawParams.ty2 - drawParams.ty1,
-                              vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);
+                              vscan, drawParams.dy1, 1, drawParams.dy2 - drawParams.dy1);*/
 
             // Make walls in the distance appear darker
+            return;
+
+            /*
             var opacity = TechEngine.Rendering.Core.getDistanceOpacity(intersection.distance);
 
             if (intersection.distance > constants.startFadingAt) {
                 context.lineSquare(vscan, drawParams.dy1, 1, drawParams.dy2, context.rgba(0, 0, 0, opacity));
             }
+            */
         }
         
         // Draw the vertical scanline for a sprite
@@ -240,38 +257,56 @@ TechEngine.Rendering = function ()
             }*/
         }
         
+        var floorTexture = new Image();
+        floorTexture.src = "img/tiles-bluegreen.png";
+        floorTexture.crossOrigin = "Anonymous";
+
+        floorTextureContext = document.createElement("canvas").getContext("2d");
+        floorTextureContext.drawImage(floorTexture, 0, 0);
+
+        var floorTextureImageData = floorTextureContext.getImageData(0, 0, floorTexture.width, floorTexture.height);
+
         // Draw the vertical scanline for the floor
-        /*var renderFloor = function(vscan, intersection)
+        var renderFloor = function(vscan, intersection)
         {
             // Formula from: http://lodev.org/cgtutor/raycasting2.html
             // Performance is horrible because of per-pixel drawing
-            var textureId = global.activeMap.sectors[intersection.sectorId].floorTexture,
-                texture = global.activeMap.textures[textureId],
+            var texture = floorTextureImageData,
+                textureData = texture.data,
+                screenWidth = constants.screenSize.w,
+                screenHeight = constants.screenSize.h,
                 startY = intersection.drawParams.dy2,
-                endY = constants.screenSize.h; // TODO: Find bottom of section
+                endY = screenHeight; // TODO: Find bottom of section
             
             for (var y = startY; y < endY; y += 1) {
-                var distance = constants.screenSize.h / (2 * y - constants.screenSize.h);
+                var distance = screenHeight / (2 * y - screenHeight);
                 
                 var weight = distance / intersection.distance,
                     floorX = weight * intersection.x + (1 - weight) * global.player.x,
                     floorY = weight * intersection.y + (1 - weight) * global.player.y,
                     textureX = parseInt(floorX * texture.width) % texture.width,
                     textureY = parseInt(floorY * texture.height) % texture.height;
-                    
-                context.drawImage(texture, 
-                                  textureX, textureY, 1, 1,
-                                  vscan, y, 1, 1);
+                
+                var index = textureX * 4 + (textureY * screenWidth * 4),
+                    r = textureData[index],
+                    g = textureData[index + 1],
+                    b = textureData[index + 2];
+
+                //frameBuffer.drawPixel(vscan, y, r, g, b);
+
+                //context.drawImage(texture, 
+                //                  textureX, textureY, 1, 1,
+                //                  vscan, y, 1, 1);
                 
                 //if (distance > constants.startFadingAt) {
                 //    var opacity = TechEngine.Rendering.Core.getDistanceOpacity(intersection.distance)
                 //    context.lineSquare(vscan, y, vscan + 1, y + 1, context.rgba(0, 0, 0, opacity))
                 //}
             }
-        };*/
+        };
 
         // Draw the vertical scanline for the floor
-        var renderFloor = function(vscan, intersection)
+        /*var renderFloor = function(vscan, intersection)
         {
             var startY = intersection.drawParams.dy2,
                 endY = constants.screenSize.h; // TODO: Find bottom of section
@@ -285,7 +320,7 @@ TechEngine.Rendering = function ()
 
             context.fillStyle = gradient;
             context.fillRect(vscan, startY, 1, endY - startY);
-        }
+        }*/
 
         // Draws a gradient that we use as floor
         var renderFloorGradient = function()
@@ -309,18 +344,16 @@ TechEngine.Rendering = function ()
         // Render the 3D scene
         var update = function()
         {
-            var map = global.activeMap;
-                
-            context = global.contextScene;
-            context.clear();
-            context.square(0, 0, constants.screenSize.w, constants.screenSize.h, "#ccc");
+            frameBuffer.clear();
             
+            /*
             // Render sky background
             renderSky(map.background);
 
             // Render floor gradient
             renderFloorGradient();
-            
+            */
+
             // Render walls and sprites
             var angle = new TechEngine.Math.Angle(global.player.angle.degrees + constants.fieldOfView / 2);
             
@@ -343,13 +376,14 @@ TechEngine.Rendering = function ()
                         renderWall(vscan, intersection);                       
 
                         // Render the floor scanline
-                        // renderFloor(vscan, intersection);
+                        renderFloor(vscan, intersection);
                     }
 
+                    /*
                     if (intersection.mapObjectType == constants.mapObjectTypes.sprite) {
                         // Render the sprite scanline
                         renderSprite(vscan, intersection);
-                    }
+                    }*/
                 }
 
                 // Rotate angle for next vscan
@@ -358,6 +392,7 @@ TechEngine.Rendering = function ()
             //if (vscan < constants.screenSize.w) { debugRenderer(vscan + 1); } }, 10); }; debugRenderer(0);
             }
 
+            sceneScreen.putImageData(frameBuffer.getImageData(), 0, 0);
         };
         
         return {

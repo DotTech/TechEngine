@@ -15,7 +15,7 @@ TechEngine.Global = function ()
         moveStepSize: 9,                // How much the player moves each step
         turnStepSize: 3,                // How many degrees the player turns
         startFadingAt: 400,             // At what distance to start fading visibility
-        glIntervalTimeout: 20,          // Gameloop interval timeout
+        glIntervalTimeout: 10,          // Gameloop interval timeout
         canvasIdScene: "scene",         // ID of canvas element to render the scene on
         canvasIdMap: "map",             // ID of canvas element to render the map on
         mapScale: 0.2,
